@@ -10,10 +10,7 @@ class Edge:
     def __getitem__(self, i):
         return self.endpoints[i]
 
-    def match(self):
-        self.matched = True
-        self.twin.matched = True
-
-    def unmatch(self):
-        self.matched = False
-        self.twin.matched = False
+    def switch(self):
+        """muda o estado da aresta de emparelhado a não empralehado e viceversa"""
+        self.matched ^= True
+        self.twin.matched ^= True

@@ -17,10 +17,7 @@ def add_child(v, u, e):
 
 def alternate(v):
     while v != v.root:
-        if v.color == 0:
-            v.parent.unmatch()
-        else:
-            v.parent.match()
+        v.parent.switch()
         v = v.parent.to
 
 done = False
@@ -50,7 +47,7 @@ while not done:
             if u.color == 0:
                 if u.root != v.root:
                     # caminho aumentante achado
-                    e.match()
+                    e.switch()
                     alternate(u)
                     alternate(v)
                     augmenting_path = True
