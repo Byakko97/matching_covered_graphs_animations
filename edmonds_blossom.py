@@ -1,4 +1,5 @@
 from common.graph import Graph
+from collections import deque
 
 n, m = [int(x) for x in input().split()]
 
@@ -7,9 +8,59 @@ g = Graph(n)
 for _ in range(m):
     u, v = [int(x) for x in input().split()]
 
+
+def add_child(v, u, e):
+    root[u] = root[v]
+    parent[u] = e
+    color[u] = 1 - color[v]
+
+def alternate(v):
+    while v != root[v]:
+        if color[v] == 0
+            parent[v].unmatch()
+        else
+            parent[v].match()
+        v = parent[v].neighbor(v)
+
 done = False
+
 while not done:
+
     done = True
+    q = deque()
+
+    color = [-1] * n
+    parent = [None] * n
+    root = [v for v in range(n)]
     for v in range(n):
-        if not g.vertices[v].covered():
+        if not g[v].covered():
+            # adiciono os vértices não emparelhados na fila
             done = False
+            color[v] = 0
+            q.append(g[v])
+    
+    while len(q) > 0:
+        v = q.popleft()
+
+        augmenting_path = False
+
+        for e in v.adjacency:
+            u = e.neighbor(v)
+            if color[u] == 0:
+                if root[u] != root[v]:
+                    # caminho aumentante achado
+                    e.match()
+                    alternate(u)
+                    alternate(v)
+                    augmenting_path = True
+                    break
+                else:
+                    # contrai a floração
+            else if color[u] == -1:
+                # extende a árvore alternante
+                add_child(v, u, e)
+                w = g[u].pair()
+                add_child(u, w, e)
+
+        if augmenting_path == True:
+            break
