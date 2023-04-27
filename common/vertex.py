@@ -3,14 +3,17 @@ class Vertex:
 
     def __init__(self):
         self.adjacency = []
+        self.color = -1
+        self.parent = None
+        self.root = self
 
     def add_neighbor(self, edge):
         self.adjacency.append(edge)
 
-    def covered(self):
+    def matched(self):
         return any([edge.matched for edge in self.adjacency])
 
     def get_match(self):
         """Devolve a aresta emparelhada incidente no vértice"""
-        e = [edge.matched for edge in self.adjacency]
-        return e[0]
+        e = filter(lambda edge: edge.matched, self.adjacency)
+        return list(e)[0]

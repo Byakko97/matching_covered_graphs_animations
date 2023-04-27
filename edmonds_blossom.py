@@ -11,17 +11,17 @@ for _ in range(m):
 
 
 def add_child(v, u, e):
-    root[u] = root[v]
-    parent[u] = e.twin
-    color[u] = 1 - color[v]
+    u.root = v.root
+    u.parent = e.twin
+    u.color = 1 - v.color
 
 def alternate(v):
-    while v != root[v]:
-        if color[v] == 0
-            parent[v].unmatch()
-        else
-            parent[v].match()
-        v = parent[v].to
+    while v != v.root:
+        if v.color == 0:
+            v.parent.unmatch()
+        else:
+            v.parent.match()
+        v = v.parent.to
 
 done = False
 
@@ -30,14 +30,14 @@ while not done:
     done = True
     q = deque()
 
-    color = [-1] * n
-    parent = [None] * n
-    root = [v for v in range(n)]
     for v in range(n):
-        if not g[v].covered():
+        g[v].color = -1
+        g[v].parent = None
+        g[v].root = g[v]
+        if not g[v].matched():
             # adiciono os vértices não emparelhados na fila
             done = False
-            color[v] = 0
+            g[v].color = 0
             q.append(g[v])
     
     while len(q) > 0:
@@ -47,8 +47,8 @@ while not done:
 
         for e in v.adjacency:
             u = e.to
-            if color[u] == 0:
-                if root[u] != root[v]:
+            if u.color == 0:
+                if u.root != v.root:
                     # caminho aumentante achado
                     e.match()
                     alternate(u)
@@ -57,7 +57,8 @@ while not done:
                     break
                 else:
                     # contrai a floração
-            else if color[u] == -1:
+                    pass
+            elif u.color == -1:
                 # extende a árvore alternante
                 add_child(v, u, e)
                 matched_e = u.get_match()
