@@ -1,5 +1,6 @@
 from common.graph import Graph
 from collections import deque
+from common.union_find import UnionFind
 
 n, m = [int(x) for x in input().split()]
 
@@ -26,6 +27,7 @@ while not done:
 
     done = True
     q = deque()
+    dsu = UnionFind(g.vertices)
 
     for v in range(n):
         g[v].color = -1
