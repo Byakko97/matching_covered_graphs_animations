@@ -6,3 +6,6 @@ class Vertex:
 
     def add_neighbor(self, edge):
         self.adjacency.append(edge)
+
+    def covered(self):
+        return any([edge.matched for edge in self.adjacency])
