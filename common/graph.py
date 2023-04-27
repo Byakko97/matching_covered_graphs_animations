@@ -12,6 +12,10 @@ class Graph:
         return self.vertices[i]
 
     def add_edge(self, u, v):
-        edge = Edge(self.vertices[u], self.vertices[v])
-        self.vertices[u].add_neighbor(edge)
-        self.vertices[v].add_neighbor(edge)
+        to_u = Edge(self.vertices[u])
+        to_v = Edge(self.vertices[v])
+        to_u.twin = to_v
+        to_v.twin = to_u
+        
+        self.vertices[u].add_neighbor(to_v)
+        self.vertices[v].add_neighbor(to_u)

@@ -10,6 +10,7 @@ class Vertex:
     def covered(self):
         return any([edge.matched for edge in self.adjacency])
 
-    def get_pair(self):
+    def get_match(self):
+        """Devolve a aresta emparelhada incidente no vértice"""
         e = [edge.matched for edge in self.adjacency]
-        return e[0].neighbor(self)
+        return e[0]

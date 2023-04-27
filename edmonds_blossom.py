@@ -7,11 +7,12 @@ g = Graph(n)
 
 for _ in range(m):
     u, v = [int(x) for x in input().split()]
+    g.add_edge(u, v)
 
 
 def add_child(v, u, e):
     root[u] = root[v]
-    parent[u] = e
+    parent[u] = e.twin
     color[u] = 1 - color[v]
 
 def alternate(v):
@@ -20,7 +21,7 @@ def alternate(v):
             parent[v].unmatch()
         else
             parent[v].match()
-        v = parent[v].neighbor(v)
+        v = parent[v].to
 
 done = False
 
@@ -45,7 +46,7 @@ while not done:
         augmenting_path = False
 
         for e in v.adjacency:
-            u = e.neighbor(v)
+            u = e.to
             if color[u] == 0:
                 if root[u] != root[v]:
                     # caminho aumentante achado
@@ -59,8 +60,9 @@ while not done:
             else if color[u] == -1:
                 # extende a árvore alternante
                 add_child(v, u, e)
-                w = g[u].pair()
-                add_child(u, w, e)
+                matched_e = u.get_match()
+                add_child(u, matched_e.to, matched_e)
+                q.append(matched_e.to)
 
         if augmenting_path == True:
             break
