@@ -2,11 +2,14 @@ from .vertex import Vertex
 from .edge import Edge
 
 class Graph:
-    "Um grafo"
+    """Um grafo"""
 
     def __init__(self, n):
         self.size = n
         self.vertices = [Vertex() for _ in range(n)]
+
+    def __getitem__(self, i):
+        return self.vertices[i]
 
     def add_edge(self, u, v):
         edge = Edge(self.vertices[u], self.vertices[v])
