@@ -6,6 +6,7 @@ class Vertex:
         self.color = -1
         self.parent = None
         self.root = self
+        self.depth = 0
 
     def add_neighbor(self, edge):
         self.adjacency.append(edge)
