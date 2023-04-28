@@ -20,6 +20,8 @@ def add_child(v, u, e):
 
 def alternate(v):
     while v != v.root:
+        while v != dsu.find(v):
+            expand(dsu.find(v))
         v.parent.switch()
         v = v.parent.to
 
@@ -33,17 +35,36 @@ def find_cycle(u, v):
         v = v.parent.to
     while u != v:
         cycle.append(u)
+        cycle.append(v)
         u = u.parent.to
         v = v.parent.to
+    cycle.append(u)
     return cycle
 
-done = False
+def shrink(cycle):
+    x = Vertex()
+    x.cycle = cycle
+    x.root = x.tip().root
+    x.parent = x.tip().parent
+    x.color = 0
+    x.depth = x.tip().depth
+    dsu.add(x)
+    for v in cycle:
+        dsu.union(x, v)
+        for e in v.adjacency:
+            if not e.to in cycle:
+                x.add_neighbor(e)
+    return x
 
-while not done:
+def expand(x):
+    for v in x.cycle:
+        dsu.detach(v)
 
-    done = True
+dsu = UnionFind(g.vertices)
+
+while True:
+
     q = deque()
-    dsu = UnionFind(g.vertices)
 
     for v in range(n):
         g[v].color = -1
@@ -59,8 +80,6 @@ while not done:
     while len(q) > 0:
         v = q.popleft()
 
-        augmenting_path = False
-
         for e in v.adjacency:
             u = e.to
             if u.color == 0:
@@ -69,12 +88,12 @@ while not done:
                     e.switch()
                     alternate(u)
                     alternate(v)
-                    augmenting_path = True
                     break
                 else:
-                    cycle = find_cycle(u, v)
                     # contrai a floração
-                    pass
+                    cycle = find_cycle(u, v)
+                    x = shrink(cycle)
+                    q.append(x)
             elif u.color == -1:
                 # extende a árvore alternante
                 add_child(v, u, e)
@@ -82,5 +101,10 @@ while not done:
                 add_child(u, matched_e.to, matched_e)
                 q.append(matched_e.to)
 
-        if augmenting_path == True:
-            break
+    if len(q) == 0:
+        break
+
+    for v in range(n):
+        while dsu.find(g[v]) != g[v]:
+            # ainda temos florações comprimidas
+            expand(dsu.find(g[v]))
