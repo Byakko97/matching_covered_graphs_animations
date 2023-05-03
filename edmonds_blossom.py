@@ -3,6 +3,7 @@ from common.vertex import Vertex
 from collections import deque
 from common.union_find import UnionFind
 
+#TODO: create read function for graphs
 n, m = [int(x) for x in input().split()]
 
 g = Graph(n)
@@ -11,6 +12,37 @@ for _ in range(m):
     u, v = [int(x) for x in input().split()]
     g.add_edge(u, v)
 
+class Blossom(Vertex):
+    """Uma floração"""
+
+    def __init__(self, dsu, cycle):
+        super().__init__(self)
+        self.cycle = cycle
+        # constrói a adjacência
+        for w in cycle:
+            for e in w.adjacency:
+                u = dsu.find(e.to)
+                if u not in cycle:
+                    self.add_neighbor(e)
+        # contrai a floração
+        dsu.add(blossom)
+        for w in cycle:
+            dsu.union(blossom, w)
+
+    def expand(self, dsu, expose=None):
+        # expande a floração deixando o vértice `expose` sem
+        # arestas emparelahdas no ciclo
+        for v in self.cycle:
+            dsu.detach(v)
+        if expose != None:
+            alternate_list = []
+            #TODO: alternar o emparelhamento deixando `expose` exposto
+            for [v, endpoint] in alternate_list:
+                v.expand(dsu, endpoint)
+        else:
+            for v in self.cycle:
+                if isinstance(v, Blossom):
+                    v.expand(dsu)
 
 def add_child(v, u, e):
     u.root = v.root
@@ -19,22 +51,27 @@ def add_child(v, u, e):
     u.depth = v.depth + 1
 
 def alternate(v):
+    #TODO: adiciona florações na fila de expansão
     while v != v.root:
         v.parent.switch()
         v = v.parent.to
 
 def find_cycle(u, v):
-    cycle = []
+    #TODO: acha as arestas do ciclo
+    path_u = []
+    path_v = []
     while u.depth > v.depth:
-        cycle.append(u)
+        path_u.append(u)
         u = u.parent.to
     while v.depth > u.depth:
-        cycle.append(v)
+        path_v.append(v)
         v = v.parent.to
     while u != v:
-        cycle.append(u)
+        path_u.append(u)
+        path_v.append(v)
         u = u.parent.to
         v = v.parent.to
+    cycle = [u] + path_u + path_v[::-1]
     return cycle
 
 done = False
@@ -72,9 +109,9 @@ while not done:
                     augmenting_path = True
                     break
                 else:
-                    cycle = find_cycle(u, v)
                     # contrai a floração
-                    pass
+                    cycle = find_cycle(u, v)
+                    blossom = Blossom(dsu, cycle)
             elif u.color == -1:
                 # extende a árvore alternante
                 add_child(v, u, e)
@@ -83,4 +120,7 @@ while not done:
                 q.append(matched_e.to)
 
         if augmenting_path == True:
+            # expande as florações por onde passou o caminho aumentante
             break
+
+    # expande todas as florações
