@@ -13,15 +13,15 @@ for _ in range(m):
     g.add_edge(u, v)
 
 class Blossom(Vertex):
-    """Uma floração"""
+    """Uma floração comprimida"""
 
     def __init__(self, dsu, cycle):
         super().__init__(self)
+        self.cycle = cycle
         self.root = self.tip().root
         self.parent = self.tip().parent
         self.color = 0
         self.depth = self.tip().depth
-        self.cycle = cycle
         # constrói a adjacência
         for w in cycle:
             for e in w.adjacency:
@@ -57,11 +57,14 @@ def add_child(v, u, e):
     u.color = 1 - v.color
     u.depth = v.depth + 1
 
-def alternate(v):
-    #TODO: adiciona florações na fila de expansão
-    while v != v.root:
-        v.parent.switch()
-        v = v.parent.to
+expansion_list = []
+def alternate(v, e):
+    if isinstance(v, Blossom):
+        expansion_list.append([v, e])
+    if v.parent == None:
+        return
+    v.parent.switch()
+    alternate(dsu.find(v.parent.to), v.parent)
 
 def find_cycle(u, v):
     #TODO: acha as arestas do ciclo
@@ -87,16 +90,16 @@ while True:
 
     q = deque()
 
-    for v in range(n):
-        g[v].color = -1
-        g[v].parent = None
-        g[v].root = g[v]
-        g[v].depth = 0
-        if not g[v].matched():
+    for v in g.vertices:
+        v.color = -1
+        v.parent = None
+        v.root = v
+        v.depth = 0
+        if not v.matched():
             # adiciono os vértices não emparelhados na fila
             done = False
-            g[v].color = 0
-            q.append(g[v])
+            v.color = 0
+            q.append(v)
     
     augmenting_path = False
 
@@ -108,8 +111,8 @@ while True:
                 if u.root != v.root:
                     # caminho aumentante achado
                     e.switch()
-                    alternate(u)
-                    alternate(v)
+                    alternate(u, e)
+                    alternate(v, e.twin)
                     augmenting_path = True
                     break
                 else:
@@ -125,6 +128,16 @@ while True:
 
         if augmenting_path == True:
             # expande as florações por onde passou o caminho aumentante
+            for [blossom, edge] in expansion_list:
+                blossom.expand(edge.to)
             break
 
     # expande todas as florações
+    for v in g.vertices:
+        x = dsu.find(v)
+        if isinstance(x, Blossom):
+            x.expand()
+
+    if augmenting_path == False:
+        # emparelhamento máximo achado
+        break
