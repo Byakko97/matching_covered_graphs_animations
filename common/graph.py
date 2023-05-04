@@ -19,3 +19,11 @@ class Graph:
         
         self.vertices[u].add_neighbor(to_v)
         self.vertices[v].add_neighbor(to_u)
+
+    def print_matching(self):
+        for v in self.vertices:
+            if v.matched():
+                e = v.get_match()
+                if e.to.id > v.id:
+                    print(v.id, e.to.id)
+        print()
