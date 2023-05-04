@@ -160,3 +160,13 @@ while True:
     if augmenting_path == False:
         # emparelhamento máximo achado
         break
+
+# imprime um emparelhamento máximo
+done = set()
+for v in g.vertices:
+    if v in done:
+        continue
+    if v.matched():
+        e = v.get_match()
+        print(e.twin.to.id, e.to.id)
+        done.add(e.to)
