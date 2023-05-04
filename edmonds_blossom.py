@@ -38,13 +38,25 @@ class Blossom(Vertex):
             return self.cycle[0]
 
     def expand(self, dsu, expose=None):
-        # expande a floração deixando o vértice `expose` sem
-        # arestas emparelahdas no ciclo
+        # expande a floração deixando o vértice `expose` não emparelhado 
         for v in self.cycle:
             dsu.detach(v)
         if expose != None:
             alternate_list = []
-            #TODO: alternar o emparelhamento deixando `expose` exposto
+            for i in range(len(cycle)):
+                if cycle[i] == expose:
+                    must_match = False
+                    for j in range(len(cycle)):
+                        pos = (i + j) % len(cycle)
+                        edge = edge_cycle[pos]
+                        must_expose = None
+                        if edge.matched != must_match:
+                            must_expose = edge.to
+                            edge.switch()
+                        if isinstance(cycle[pos], Blossom):
+                            alternate_list.append([cycle[pos], must_expose])
+                        must_match ^= True
+                    break
             for [v, endpoint] in alternate_list:
                 v.expand(dsu, endpoint)
         else:
@@ -136,14 +148,14 @@ while True:
         if augmenting_path == True:
             # expande as florações por onde passou o caminho aumentante
             for [blossom, edge] in expansion_list:
-                blossom.expand(edge.to)
+                blossom.expand(dsu, edge.to)
             break
 
     # expande todas as florações
     for v in g.vertices:
         x = dsu.find(v)
         if isinstance(x, Blossom):
-            x.expand()
+            x.expand(dsu)
 
     if augmenting_path == False:
         # emparelhamento máximo achado
