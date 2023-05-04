@@ -15,9 +15,10 @@ for _ in range(m):
 class Blossom(Vertex):
     """Uma floração comprimida"""
 
-    def __init__(self, dsu, cycle):
+    def __init__(self, dsu, cycle, edge_cycle):
         super().__init__(self)
         self.cycle = cycle
+        self.edge_cycle = edge_cycle
         self.root = self.tip().root
         self.parent = self.tip().parent
         self.color = 0
@@ -66,23 +67,29 @@ def alternate(v, e):
     v.parent.switch()
     alternate(dsu.find(v.parent.to), v.parent)
 
-def find_cycle(u, v):
-    #TODO: acha as arestas do ciclo
+def find_cycle(u, v, u_to_v):
     path_u = []
     path_v = []
+    edges_u = []
+    edges_v = []
     while u.depth > v.depth:
         path_u.append(u)
+        edges_u.append(u.parent)
         u = u.parent.to
     while v.depth > u.depth:
         path_v.append(v)
+        edges_v.append(v.parent)
         v = v.parent.to
     while u != v:
         path_u.append(u)
+        edges_u.append(u.parent)
         path_v.append(v)
+        edges_v.append(v.parent)
         u = u.parent.to
         v = v.parent.to
     cycle = [u] + path_u[::-1] + path_v
-    return cycle
+    edge_cycle = [e.twin for e in edges_u] + u_to_v + edges_v
+    return cycle, edge_cycle
 
 dsu = UnionFind(g.vertices)
 
@@ -117,8 +124,8 @@ while True:
                     break
                 else:
                     # contrai a floração
-                    cycle = find_cycle(u, v)
-                    blossom = Blossom(dsu, cycle)
+                    cycle, edge_cycle = find_cycle(u, v, e.twin)
+                    blossom = Blossom(dsu, cycle, edge_cycle)
             elif u.color == -1:
                 # extende a árvore alternante
                 add_child(v, u, e)
