@@ -16,7 +16,7 @@ class Blossom(Vertex):
     """Uma floração comprimida"""
 
     def __init__(self, dsu, cycle, edge_cycle):
-        super().__init__(self)
+        super().__init__()
         self.cycle = cycle
         self.edge_cycle = edge_cycle
         self.root = self.tip().root
@@ -100,7 +100,7 @@ def find_cycle(u, v, u_to_v):
         u = u.parent.to
         v = v.parent.to
     cycle = [u] + path_u[::-1] + path_v
-    edge_cycle = [e.twin for e in edges_u] + u_to_v + edges_v
+    edge_cycle = [e.twin for e in edges_u] + [u_to_v] + edges_v
     return cycle, edge_cycle
 
 dsu = UnionFind(g.vertices)
