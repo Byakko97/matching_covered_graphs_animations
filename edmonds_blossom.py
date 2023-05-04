@@ -160,3 +160,9 @@ while True:
     if augmenting_path == False:
         # emparelhamento máximo achado
         break
+
+for v in g.vertices:
+    if v.matched():
+        e = v.get_match()
+        if e.to.id > v.id:
+            print(v.id, e.to.id)
