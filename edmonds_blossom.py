@@ -81,7 +81,7 @@ def find_cycle(u, v):
         path_v.append(v)
         u = u.parent.to
         v = v.parent.to
-    cycle = [u] + path_u + path_v[::-1]
+    cycle = [u] + path_u[::-1] + path_v
     return cycle
 
 dsu = UnionFind(g.vertices)
