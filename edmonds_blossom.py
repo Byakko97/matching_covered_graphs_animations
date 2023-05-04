@@ -3,6 +3,7 @@ from common.vertex import Vertex
 from collections import deque
 from common.union_find import UnionFind
 
+#TODO: create read function for graphs
 n, m = [int(x) for x in input().split()]
 
 g = Graph(n)
@@ -11,6 +12,44 @@ for _ in range(m):
     u, v = [int(x) for x in input().split()]
     g.add_edge(u, v)
 
+class Blossom(Vertex):
+    """Uma floração"""
+
+    def __init__(self, dsu, cycle):
+        super().__init__(self)
+        self.root = self.tip().root
+        self.parent = self.tip().parent
+        self.color = 0
+        self.depth = self.tip().depth
+        self.cycle = cycle
+        # constrói a adjacência
+        for w in cycle:
+            for e in w.adjacency:
+                u = dsu.find(e.to)
+                if u not in cycle:
+                    self.add_neighbor(e)
+        # contrai a floração
+        dsu.add(self)
+        for w in cycle:
+            dsu.union(self, w)
+
+    def tip(self):
+            return self.cycle[0]
+
+    def expand(self, dsu, expose=None):
+        # expande a floração deixando o vértice `expose` sem
+        # arestas emparelahdas no ciclo
+        for v in self.cycle:
+            dsu.detach(v)
+        if expose != None:
+            alternate_list = []
+            #TODO: alternar o emparelhamento deixando `expose` exposto
+            for [v, endpoint] in alternate_list:
+                v.expand(dsu, endpoint)
+        else:
+            for v in self.cycle:
+                if isinstance(v, Blossom):
+                    v.expand(dsu)
 
 def add_child(v, u, e):
     u.root = v.root
@@ -19,46 +58,28 @@ def add_child(v, u, e):
     u.depth = v.depth + 1
 
 def alternate(v):
+    #TODO: adiciona florações na fila de expansão
     while v != v.root:
-        while v != dsu.find(v):
-            expand(dsu.find(v))
         v.parent.switch()
         v = v.parent.to
 
 def find_cycle(u, v):
-    cycle = []
+    #TODO: acha as arestas do ciclo
+    path_u = []
+    path_v = []
     while u.depth > v.depth:
-        cycle.append(u)
+        path_u.append(u)
         u = u.parent.to
     while v.depth > u.depth:
-        cycle.append(v)
+        path_v.append(v)
         v = v.parent.to
     while u != v:
-        cycle.append(u)
-        cycle.append(v)
+        path_u.append(u)
+        path_v.append(v)
         u = u.parent.to
         v = v.parent.to
-    cycle.append(u)
+    cycle = [u] + path_u + path_v[::-1]
     return cycle
-
-def shrink(cycle):
-    x = Vertex()
-    x.cycle = cycle
-    x.root = x.tip().root
-    x.parent = x.tip().parent
-    x.color = 0
-    x.depth = x.tip().depth
-    dsu.add(x)
-    for v in cycle:
-        dsu.union(x, v)
-        for e in v.adjacency:
-            if not e.to in cycle:
-                x.add_neighbor(e)
-    return x
-
-def expand(x):
-    for v in x.cycle:
-        dsu.detach(v)
 
 dsu = UnionFind(g.vertices)
 
@@ -77,9 +98,10 @@ while True:
             g[v].color = 0
             q.append(g[v])
     
+    augmenting_path = False
+
     while len(q) > 0:
         v = q.popleft()
-
         for e in v.adjacency:
             u = e.to
             if u.color == 0:
@@ -88,12 +110,12 @@ while True:
                     e.switch()
                     alternate(u)
                     alternate(v)
+                    augmenting_path = True
                     break
                 else:
                     # contrai a floração
                     cycle = find_cycle(u, v)
-                    x = shrink(cycle)
-                    q.append(x)
+                    blossom = Blossom(dsu, cycle)
             elif u.color == -1:
                 # extende a árvore alternante
                 add_child(v, u, e)
@@ -101,10 +123,8 @@ while True:
                 add_child(u, matched_e.to, matched_e)
                 q.append(matched_e.to)
 
-    if len(q) == 0:
-        break
+        if augmenting_path == True:
+            # expande as florações por onde passou o caminho aumentante
+            break
 
-    for v in range(n):
-        while dsu.find(g[v]) != g[v]:
-            # ainda temos florações comprimidas
-            expand(dsu.find(g[v]))
+    # expande todas as florações
