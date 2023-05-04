@@ -6,7 +6,7 @@ class Graph:
 
     def __init__(self, n):
         self.size = n
-        self.vertices = [Vertex() for _ in range(n)]
+        self.vertices = [Vertex(i) for i in range(n)]
 
     def __getitem__(self, i):
         return self.vertices[i]

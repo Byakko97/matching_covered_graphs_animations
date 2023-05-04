@@ -1,7 +1,8 @@
 class Vertex:
     """Um vértice de um grafo"""
 
-    def __init__(self):
+    def __init__(self, id = None):
+        self.id = id
         self.adjacency = []
         self.color = -1
         self.parent = None
