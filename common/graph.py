@@ -4,7 +4,7 @@ from .edge import Edge
 class Graph:
     """Um grafo"""
 
-    def __init__(self, n):
+    def __init__(self, n=0):
         self.size = n
         self.vertices = [Vertex(i) for i in range(n)]
 
@@ -26,3 +26,10 @@ class Graph:
                 if e.matched and e.to.id > v.id:
                     print(v.id, e.to.id)
         print()
+
+    def read(self):
+        n, m = [int(x) for x in input().split()]
+        self.__init__(n)
+        for _ in range(m):
+            u, v = [int(x) for x in input().split()]
+            self.add_edge(u, v)

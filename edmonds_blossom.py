@@ -3,14 +3,8 @@ from common.vertex import Vertex
 from collections import deque
 from common.union_find import UnionFind
 
-#TODO: create read function for graphs
-n, m = [int(x) for x in input().split()]
-
-g = Graph(n)
-
-for _ in range(m):
-    u, v = [int(x) for x in input().split()]
-    g.add_edge(u, v)
+g = Graph()
+g.read()
 
 class Blossom(Vertex):
     """Uma floração comprimida"""
