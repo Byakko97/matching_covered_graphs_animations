@@ -31,23 +31,30 @@ class Blossom(Vertex):
         for v in self.cycle:
             dsu.detach(v)
         if expose != None:
-            alternate_list = []
+            expansion_list = []
+            pivot = dsu.find(expose)
+            if isinstance(pivot, Blossom):
+                expansion_list.append([pivot, expose])
             for i in range(len(self.cycle)):
-                if self.cycle[i] == expose:
+                if self.cycle[i] == pivot:
                     must_match = False
                     for j in range(len(self.cycle)):
                         pos = (i + j) % len(self.cycle)
                         edge = self.edge_cycle[pos]
-                        must_expose = None
+                        change = False
                         if edge.matched != must_match:
-                            must_expose = edge.to
+                            change = True
                             edge.switch()
-                        #TODO: fix bug
-                        #if isinstance(cycle[pos], Blossom):
-                        #    alternate_list.append([cycle[pos], must_expose])
+                        if edge.matched:
+                            if isinstance(self.cycle[pos], Blossom):
+                                expansion_list.append([self.cycle[pos], edge.twin.to if change else None])
+                            nxt = (pos + 1) % len(self.cycle)
+                            if isinstance(self.cycle[pos], Blossom):
+                                expansion_list.append([self.cycle[nxt], edge.to if change else None])
+
                         must_match ^= True
                     break
-            for [v, endpoint] in alternate_list:
+            for [v, endpoint] in expansion_list:
                 v.expand(dsu, endpoint)
         else:
             for v in self.cycle:
