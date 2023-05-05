@@ -43,18 +43,19 @@ class Blossom(Vertex):
             dsu.detach(v)
         if expose != None:
             alternate_list = []
-            for i in range(len(cycle)):
-                if cycle[i] == expose:
+            for i in range(len(self.cycle)):
+                if self.cycle[i] == expose:
                     must_match = False
-                    for j in range(len(cycle)):
-                        pos = (i + j) % len(cycle)
-                        edge = edge_cycle[pos]
+                    for j in range(len(self.cycle)):
+                        pos = (i + j) % len(self.cycle)
+                        edge = self.edge_cycle[pos]
                         must_expose = None
                         if edge.matched != must_match:
                             must_expose = edge.to
                             edge.switch()
-                        if isinstance(cycle[pos], Blossom):
-                            alternate_list.append([cycle[pos], must_expose])
+                        #TODO: fix bug
+                        #if isinstance(cycle[pos], Blossom):
+                        #    alternate_list.append([cycle[pos], must_expose])
                         must_match ^= True
                     break
             for [v, endpoint] in alternate_list:
@@ -63,6 +64,9 @@ class Blossom(Vertex):
             for v in self.cycle:
                 if isinstance(v, Blossom):
                     v.expand(dsu)
+
+    def print(self):
+        print([v.id for v in self.cycle])
 
 def add_child(v, u, e):
     u.root = v.root
@@ -84,20 +88,15 @@ def find_cycle(u, v, u_to_v):
     path_v = []
     edges_u = []
     edges_v = []
-    print("constuindo ciclo")
     while u.depth > v.depth:
-        print(u.id)
         path_u.append(u)
         edges_u.append(u.parent)
         u = u.parent.to
     while v.depth > u.depth:
-        print(v.id)
         path_v.append(v)
         edges_v.append(v.parent)
         v = v.parent.to
     while u != v:
-        print(u.id)
-        print(v.id)
         path_u.append(u)
         edges_u.append(u.parent)
         path_v.append(v)
@@ -105,7 +104,7 @@ def find_cycle(u, v, u_to_v):
         u = u.parent.to
         v = v.parent.to
     cycle = [u] + path_u[::-1] + path_v
-    edge_cycle = [e.twin for e in edges_u] + [u_to_v] + edges_v
+    edge_cycle = [e.twin for e in edges_u][::-1] + [u_to_v] + edges_v
     return cycle, edge_cycle
 
 dsu = UnionFind(g.vertices)
@@ -134,14 +133,11 @@ while True:
             # se o vértice foi contraido por outro, já não é válido no novo grafo
             continue
         v = x
-        print(v.id)
         for e in v.adjacency:
             u = dsu.find(e.to)
-            print(u.id)
             if u.color == 0:
                 if u.root != v.root:
                     # caminho aumentante achado
-                    print("aumenta")
                     e.switch()
                     alternate(u, e)
                     alternate(v, e.twin)
@@ -149,14 +145,12 @@ while True:
                     break
                 else:
                     # contrai a floração
-                    print("contrai")
                     cycle, edge_cycle = find_cycle(u, v, e.twin)
                     blossom = Blossom(dsu, cycle, edge_cycle)
                     q.append(blossom)
                     break
             elif u.color == -1:
                 # extende a árvore alternante
-                print("extende")
                 add_child(v, u, e)
                 matched_e = u.get_match()
                 add_child(u, matched_e.to, matched_e)
