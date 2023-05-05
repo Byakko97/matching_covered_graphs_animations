@@ -22,8 +22,7 @@ class Graph:
 
     def print_matching(self):
         for v in self.vertices:
-            if v.matched():
-                e = v.get_match()
-                if e.to.id > v.id:
+            for e in v.adjacency:
+                if e.matched and e.to.id > v.id:
                     print(v.id, e.to.id)
         print()
