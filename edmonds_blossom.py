@@ -15,13 +15,22 @@ def add_child(v, u, e):
     u.depth = v.depth + 1
 
 expansion_list = []
-def alternate(v, e):
-    if isinstance(v, Blossom):
-        expansion_list.append([v, e])
+def switch_match(e):
+    e.switch()
+    if e.matched:
+        # se a aresta entrou no emparelhamento, devemos ajeitar os
+        # extremos dela se eles forem florações
+        f = e
+        for _ in range(2):
+            v = dsu.find(f.to)
+            if isinstance(v, Blossom):
+                expansion_list.append([v, f.to])
+            f = e.twin
+def alternate(v):
     if v.parent == None:
         return
-    v.parent.switch()
-    alternate(dsu.find(v.parent.to), v.parent)
+    switch_match(v.parent)
+    alternate(dsu.find(v.parent.to))
 
 def find_cycle(u, v, u_to_v):
     path_u = []
@@ -78,9 +87,9 @@ while True:
             if u.color == 0:
                 if u.root != v.root:
                     # caminho aumentante achado
-                    e.switch()
-                    alternate(u, e)
-                    alternate(v, e.twin)
+                    switch_match(e)
+                    alternate(u)
+                    alternate(v)
                     augmenting_path = True
                     break
                 else:
@@ -98,8 +107,8 @@ while True:
 
         if augmenting_path == True:
             # expande as florações por onde passou o caminho aumentante
-            for [blossom, edge] in expansion_list:
-                blossom.expand(dsu, edge.to)
+            for [blossom, expose] in expansion_list:
+                blossom.expand(dsu, expose)
             break
 
     # expande todas as florações
