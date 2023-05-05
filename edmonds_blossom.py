@@ -117,8 +117,8 @@ while True:
         if isinstance(x, Blossom):
             x.expand(dsu)
 
-    g.print_matching()
-
     if augmenting_path == False:
         # emparelhamento máximo achado
         break
+
+g.print_matching()

@@ -25,7 +25,6 @@ class Graph:
             for e in v.adjacency:
                 if e.matched and e.to.id > v.id:
                     print(v.id, e.to.id)
-        print()
 
     def read(self):
         n, m = [int(x) for x in input().split()]
