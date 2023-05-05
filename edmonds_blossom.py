@@ -84,15 +84,20 @@ def find_cycle(u, v, u_to_v):
     path_v = []
     edges_u = []
     edges_v = []
+    print("constuindo ciclo")
     while u.depth > v.depth:
+        print(u.id)
         path_u.append(u)
         edges_u.append(u.parent)
         u = u.parent.to
     while v.depth > u.depth:
+        print(v.id)
         path_v.append(v)
         edges_v.append(v.parent)
         v = v.parent.to
     while u != v:
+        print(u.id)
+        print(v.id)
         path_u.append(u)
         edges_u.append(u.parent)
         path_v.append(v)
@@ -124,11 +129,19 @@ while True:
 
     while len(q) > 0:
         v = q.popleft()
+        x = dsu.find(v)
+        if v != x:
+            # se o vértice foi contraido por outro, já não é válido no novo grafo
+            continue
+        v = x
+        print(v.id)
         for e in v.adjacency:
-            u = e.to
+            u = dsu.find(e.to)
+            print(u.id)
             if u.color == 0:
                 if u.root != v.root:
                     # caminho aumentante achado
+                    print("aumenta")
                     e.switch()
                     alternate(u, e)
                     alternate(v, e.twin)
@@ -136,10 +149,14 @@ while True:
                     break
                 else:
                     # contrai a floração
+                    print("contrai")
                     cycle, edge_cycle = find_cycle(u, v, e.twin)
                     blossom = Blossom(dsu, cycle, edge_cycle)
+                    q.append(blossom)
+                    break
             elif u.color == -1:
                 # extende a árvore alternante
+                print("extende")
                 add_child(v, u, e)
                 matched_e = u.get_match()
                 add_child(u, matched_e.to, matched_e)
@@ -157,16 +174,8 @@ while True:
         if isinstance(x, Blossom):
             x.expand(dsu)
 
+    g.print_matching()
+
     if augmenting_path == False:
         # emparelhamento máximo achado
         break
-
-# imprime um emparelhamento máximo
-done = set()
-for v in g.vertices:
-    if v in done:
-        continue
-    if v.matched():
-        e = v.get_match()
-        print(e.twin.to.id, e.to.id)
-        done.add(e.to)
