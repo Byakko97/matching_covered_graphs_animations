@@ -106,6 +106,7 @@ while True:
             # expande as florações por onde passou o caminho aumentante
             for [blossom, expose] in expansion_list:
                 blossom.expand(dsu, expose)
+            expansion_list = []
             break
 
     # expande todas as florações
