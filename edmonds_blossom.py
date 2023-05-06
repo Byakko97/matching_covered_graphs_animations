@@ -32,26 +32,23 @@ def alternate(v):
     switch_match(v.parent)
     alternate(dsu.find(v.parent.to))
 
+def go_up(u, edges, path):
+    path.append(u)
+    edges.append(u.parent)
+    return dsu.find(u.parent.to)
+
 def find_cycle(u, v, u_to_v):
     path_u = []
     path_v = []
     edges_u = []
     edges_v = []
     while u.depth > v.depth:
-        path_u.append(u)
-        edges_u.append(u.parent)
-        u = u.parent.to
+        u = go_up(u, edges_u, path_u)
     while v.depth > u.depth:
-        path_v.append(v)
-        edges_v.append(v.parent)
-        v = v.parent.to
+        v = go_up(v, edges_v, path_v)
     while u != v:
-        path_u.append(u)
-        edges_u.append(u.parent)
-        path_v.append(v)
-        edges_v.append(v.parent)
-        u = u.parent.to
-        v = v.parent.to
+        u = go_up(u, edges_u, path_u)
+        v = go_up(v, edges_v, path_v)
     cycle = [u] + path_u[::-1] + path_v
     edge_cycle = [e.twin for e in edges_u][::-1] + [u_to_v] + edges_v
     return cycle, edge_cycle
