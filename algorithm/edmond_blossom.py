@@ -1,9 +1,9 @@
 
 from collections import deque
 
-from common.blossom import Blossom
-from common.graph import Graph
-from common.union_find import UnionFind
+from ..common.blossom import Blossom
+from ..common.graph import Graph
+from ..common.union_find import UnionFind
 
 g = Graph()
 g.read()
