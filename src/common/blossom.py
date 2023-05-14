@@ -1,5 +1,5 @@
 
-from common.vertex import Vertex
+from src.common.vertex import Vertex
 
 class Blossom(Vertex):
     """Uma floração comprimida"""

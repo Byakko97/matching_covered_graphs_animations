@@ -1,5 +1,5 @@
-from common.vertex import Vertex
-from common.edge import Edge
+from src.common.vertex import Vertex
+from src.common.edge import Edge
 
 class Graph:
     """Um grafo"""
