@@ -64,7 +64,7 @@ class EdmondsBlossom():
 
             if augmenting_path == True:
                 # expande as florações por onde passou o caminho aumentante
-                for [blossom, expose] in expansion_list:
+                for [blossom, expose] in self.expansion_list:
                     blossom.expand(self.dsu, expose)
                 expansion_list = []
                 break
