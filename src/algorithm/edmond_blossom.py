@@ -13,7 +13,7 @@ class EdmondsBlossom():
 
     def run(self):
         while self.augment():
-            continue
+            self.__expand_all()
         self.g.print_matching()
 
     def augment(self):
@@ -63,19 +63,21 @@ class EdmondsBlossom():
                     q.append(matched_e.to)
 
             if augmenting_path == True:
-                # expande as florações por onde passou o caminho aumentante
-                for [blossom, expose] in self.expansion_list:
-                    blossom.expand(self.dsu, expose)
-                expansion_list = []
                 break
 
-        # expande todas as florações
+        return augmenting_path
+
+    def __expand_all(self):
+        # expande as florações por onde passou o caminho aumentante
+        for [blossom, expose] in self.expansion_list:
+            blossom.expand(self.dsu, expose)
+        expansion_list = []
+
+        # expande o resto de florações
         for v in self.g.vertices:
             x = self.dsu.find(v)
             if isinstance(x, Blossom):
                 x.expand(self.dsu)
-
-        return augmenting_path
 
     def __add_child(self, v, u, e):
         u.root = v.root
