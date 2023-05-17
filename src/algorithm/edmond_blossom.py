@@ -12,9 +12,46 @@ class EdmondsBlossom():
         self.dsu = UnionFind(g.vertices)
 
     def run(self):
+        self.__run()
+        self.g.print_matching()
+
+    def verify(self):
+        self.__run()
+        deficiency = 0
+        barrier = set()
+        for v in g.vertices:
+            count_match = [e.matched for e in v.adjacency].count(True)
+            if count_match > 1:
+                print("The set of edges")
+                self.g.print_matching()
+                print("is not a matching since " + v.id + " has more than one incident edge of that set.")
+                return False
+            deficiency += count_match == 0
+            if v.color == 1 and not isinstance(self.dsu.find(v), Blossom):
+                barrier.add(v)
+        for v in g.vertices:
+            if v.color != 3:
+                # color 3 indicates that the vertex was already counted
+                odd += self.__count_size(v, barrier) & 1
+        if deficiency != odd - len(barrier):
+                print("The matching")
+                self.g.print_matching()
+                print("is not maximum")
+                return False
+        return True
+
+    def __count_size(self, v, barrier):
+        v.color = 3
+        sz = 1
+        for e in v.adjacency:
+            u = e.to
+            if u.color != 3 and not u in barrier:
+                sz += self.__count_size(u, barrier)
+        return sz
+
+    def __run(self):
         while self.augment():
             self.__expand_all()
-        self.g.print_matching()
 
     def augment(self):
         q = deque()
