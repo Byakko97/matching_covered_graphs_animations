@@ -15,9 +15,11 @@ for test_id in listdir("tests/"):
     g = Graph()
     g.read()
 
+    print(test_id, ": ", end='')
+
     algo = EdmondsBlossom(g)
     if algo.verify():
         print("OK")
     else:
-        print("FAILED ON TEST " + test_id)
+        print("FAILED")
         break
