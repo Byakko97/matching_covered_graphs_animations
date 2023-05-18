@@ -49,7 +49,7 @@ class Blossom(Vertex):
                             if isinstance(self.cycle[pos], Blossom):
                                 expansion_list.append([self.cycle[pos], edge.twin.to if change else None])
                             nxt = (pos + 1) % len(self.cycle)
-                            if isinstance(self.cycle[pos], Blossom):
+                            if isinstance(self.cycle[nxt], Blossom):
                                 expansion_list.append([self.cycle[nxt], edge.to if change else None])
 
                         must_match ^= True

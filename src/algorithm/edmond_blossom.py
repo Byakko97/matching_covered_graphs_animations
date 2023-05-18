@@ -113,7 +113,7 @@ class EdmondsBlossom():
         # expande as florações por onde passou o caminho aumentante
         for [blossom, expose] in self.expansion_list:
             blossom.expand(self.dsu, expose)
-        expansion_list = []
+        self.expansion_list = []
 
         # expande o resto de florações
         for v in self.g.vertices:
