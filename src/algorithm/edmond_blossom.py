@@ -38,9 +38,6 @@ class EdmondsBlossom():
                 odd += self.__count_size(v, barrier) & 1
 
         if deficiency != odd - len(barrier):
-                print("The matching")
-                self.g.print_matching()
-                print("is not maximum")
                 return False
 
         return True
