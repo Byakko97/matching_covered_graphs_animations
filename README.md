@@ -4,7 +4,7 @@ Animations of algorithms related to matching covered graphs. This project is par
 
 ## Usage
 
-The supported functionalities by now are to run and test algorithms (without animation).
+The supported functionalities are to run and test algorithms.
 
 ### Run algorithms
 
@@ -16,6 +16,11 @@ python3 run.py algo test_id
 
 The tests are in the folder `tests` and the id of a test is the name of the file in which it is contained.
 
+Add the flag `-a` if you want to see an animation of the algorithm.
+
+```
+python3 run.py algo test_id -a
+```
 ### Test algorithms
 
 Use the following command to test the algorithm `algo` with all the tests in the folder `tests`:
