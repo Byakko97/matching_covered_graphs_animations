@@ -12,8 +12,7 @@ args = parser.parse_args()
 
 for test_id in listdir("tests/"):
     sys.stdin = open("tests/" + test_id, "r")
-    g = Graph()
-    g.read()
+    g = Graph(read=True)
 
     print(test_id, ": ", end='')
 
