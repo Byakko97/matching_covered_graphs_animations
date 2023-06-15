@@ -52,8 +52,10 @@ class EdmondsBlossom():
         return sz
 
     def __run(self):
+        self.g.animate()
         while self.augment():
             self.__expand_all()
+            self.g.animate()
 
     def augment(self):
         q = deque()
@@ -109,14 +111,14 @@ class EdmondsBlossom():
     def __expand_all(self):
         # expande as florações por onde passou o caminho aumentante
         for [blossom, expose] in self.expansion_list:
-            blossom.expand(self.dsu, expose)
+            blossom.expand(self.g, self.dsu, expose)
         self.expansion_list = []
 
         # expande o resto de florações
         for v in self.g.vertices:
             x = self.dsu.find(v)
             if isinstance(x, Blossom):
-                x.expand(self.dsu)
+                x.expand(self.g, self.dsu)
 
     def __add_child(self, v, u, e):
         u.root = v.root
@@ -125,7 +127,7 @@ class EdmondsBlossom():
         u.depth = v.depth + 1
 
     def __switch_match(self, e):
-        e.switch()
+        self.g.switch(e)
         if e.matched:
             # se a aresta entrou no emparelhamento, devemos ajeitar os
             # extremos dela se eles forem florações
