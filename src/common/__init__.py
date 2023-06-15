@@ -2,9 +2,10 @@
 
 Módulos disponíveis:
 
-- blossom:      classe que define uma floração comprimida num vértice
-- edge:         classe que define uma aresta
-- graph:        classe que define um grafo
-- union_find:   classe com implementaçao especial de union-find
-- vertex:       classe que define um vértice
+- blossom:          classe que define uma floração comprimida num vértice
+- edge:             classe que define uma aresta
+- graph:            classe que define um grafo
+- graph_animation:  classe que define a animação de um grafo
+- union_find:       classe com implementaçao especial de union-find
+- vertex:           classe que define um vértice
 """
