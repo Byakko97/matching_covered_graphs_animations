@@ -2,6 +2,10 @@
 
 Animations of algorithms related to matching covered graphs. This project is part of my Bachelor Thesis (under development).
 
+## Requirements
+
+In order to use this program, you must install `graph-tools`. Follow the [official installation instructions](https://git.skewed.de/count0/graph-tool/-/wikis/installation-instructions) to do so.
+
 ## Usage
 
 The supported functionalities are to run and test algorithms.
