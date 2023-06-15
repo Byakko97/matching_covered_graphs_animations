@@ -52,10 +52,10 @@ class EdmondsBlossom():
         return sz
 
     def __run(self):
-        self.g.animate()
         while self.augment():
-            self.__expand_all()
             self.g.animate()
+            self.__expand_all()
+        self.g.animate(True)
 
     def augment(self):
         q = deque()

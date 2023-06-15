@@ -46,6 +46,6 @@ class Graph:
                 if e.matched and e.to.id > v.id:
                     print(v.id, e.to.id)
 
-    def animate(self):
+    def animate(self, last=False):
         if self.animation != None:
-            self.animation.animate()
+            self.animation.animate(last)

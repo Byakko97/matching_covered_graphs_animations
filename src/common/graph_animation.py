@@ -21,9 +21,9 @@ class GraphAnimation:
     def switch(self, e):
         self.matched[self.g.edge(e.to.id, e.twin.to.id)] = 'red' if e.matched else 'black'
 
-    def animate(self):
+    def animate(self, last=False):
         if self.pos == None:
             self.pos = gt.sfdp_layout(self.g)
 
-        self.win = gt.graph_draw(self.g, self.pos, edge_color=self.matched, window=self.win, return_window=True, main=False)
+        self.win = gt.graph_draw(self.g, self.pos, edge_color=self.matched, window=self.win, return_window=True, main=last)
         time.sleep(0.5)
