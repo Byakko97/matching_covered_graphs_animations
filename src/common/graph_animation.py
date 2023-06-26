@@ -26,4 +26,4 @@ class GraphAnimation:
             self.pos = gt.sfdp_layout(self.g)
 
         self.win = gt.graph_draw(self.g, self.pos, edge_color=self.matched, window=self.win, return_window=True, main=last)
-        time.sleep(0.5)
+        time.sleep(1.5)

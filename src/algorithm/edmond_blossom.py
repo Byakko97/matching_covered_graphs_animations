@@ -52,9 +52,10 @@ class EdmondsBlossom():
         return sz
 
     def __run(self):
+        self.g.animate()
         while self.augment():
-            self.g.animate()
             self.__expand_all()
+            self.g.animate()
         self.g.animate(True)
 
     def augment(self):
