@@ -1,8 +1,9 @@
 import graph_tool.all as gt
-import time
+
+from gi.repository import Gtk, GLib
 
 class GraphAnimation:
-    """Um grafo"""
+    """Animação de um grafo"""
 
     def __init__(self, n=0):
         self.g = gt.Graph(directed = False)
@@ -21,9 +22,17 @@ class GraphAnimation:
     def switch(self, e):
         self.matched[self.g.edge(e.to.id, e.twin.to.id)] = 'red' if e.matched else 'black'
 
-    def animate(self, last=False):
-        if self.pos == None:
-            self.pos = gt.sfdp_layout(self.g)
+    def animate(self, callback):
+        self.pos = gt.sfdp_layout(self.g)
+        self.win = gt.GraphWindow(self.g, self.pos, geometry=(500,400), edge_color=self.matched)
 
-        self.win = gt.graph_draw(self.g, self.pos, edge_color=self.matched, window=self.win, return_window=True, main=last)
-        time.sleep(1.5)
+        self.win.connect("delete_event", Gtk.main_quit)
+        self.win.graph.disconnect_by_func(self.win.graph.button_press_event)
+        self.win.connect("button_press_event", callback)
+        self.win.show_all()
+
+        Gtk.main()
+
+    def update_state(self):
+        self.win.graph.regenerate_surface()
+        self.win.graph.queue_draw()

@@ -15,6 +15,9 @@ class EdmondsBlossom():
         self.__run()
         self.g.print_matching()
 
+    def animate(self):
+        self.g.animation.animate(self.__update_state)
+
     def verify(self):
         self.__run()
 
@@ -50,13 +53,19 @@ class EdmondsBlossom():
             if u.color != 3 and not u in barrier:
                 sz += self.__count_size(u, barrier)
         return sz
+    
+    def __update_state(self, widget, event):
+        if not self.augment():
+            return False
+        
+        self.__expand_all()
+        self.g.animation.update_state()
+
+        return True
 
     def __run(self):
-        self.g.animate()
         while self.augment():
             self.__expand_all()
-            self.g.animate()
-        self.g.animate(True)
 
     def augment(self):
         q = deque()

@@ -15,4 +15,8 @@ sys.stdin = open("tests/" + args.test_id, "r")
 g = Graph(read=True, animate=args.animate)
 
 algo = EdmondsBlossom(g)
-algo.run()
+
+if args.animate:
+    algo.animate()
+else:
+    algo.run()

@@ -45,7 +45,3 @@ class Graph:
             for e in v.adjacency:
                 if e.matched and e.to.id > v.id:
                     print(v.id, e.to.id)
-
-    def animate(self, last=False):
-        if self.animation != None:
-            self.animation.animate(last)
