@@ -56,15 +56,19 @@ class EdmondsBlossom():
         return sz
     
     def __update_state(self, widget, event):
+        if self.step == 2:
+            return False
+        
         if self.step == 0:
             self.__build_queue()
             self.step = 1
         result = self.__iterate()
-        if result == "stop":
-            return False
-        if result == "augment":
+        if result != "shrink":
             self.__expand_all()
-            self.step = 0
+            if result == "augment":
+                self.step = 0
+            else:
+                self.step = 2
 
         self.g.animation.update_state()
         return True
@@ -76,9 +80,9 @@ class EdmondsBlossom():
                 result = self.__iterate()
                 if result != "shrink":
                     break
+            self.__expand_all()
             if result == "stop":
                 break 
-            self.__expand_all()
 
     def __build_queue(self):
         self.q = deque()
@@ -128,14 +132,14 @@ class EdmondsBlossom():
     def __expand_all(self):
         # expande as florações por onde passou o caminho aumentante
         for [blossom, expose] in self.expansion_list:
-            blossom.expand(self.g, self.dsu, expose)
+            blossom.expand(self.g, self.dsu, self.g.animation, expose)
         self.expansion_list = []
 
         # expande o resto de florações
         for v in self.g.vertices:
             x = self.dsu.find(v)
             if isinstance(x, Blossom):
-                x.expand(self.g, self.dsu)
+                x.expand(self.g, self.dsu, self.g.animation)
 
     def __add_child(self, v, u, e):
         u.root = v.root

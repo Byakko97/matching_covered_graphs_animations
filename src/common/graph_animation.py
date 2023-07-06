@@ -1,6 +1,7 @@
 import graph_tool.all as gt
+import copy
 
-from gi.repository import Gtk, GLib
+from gi.repository import Gtk
 
 class GraphAnimation:
     """Animação de um grafo"""
@@ -23,7 +24,7 @@ class GraphAnimation:
         self.matched[self.g.edge(e.to.id, e.twin.to.id)] = 'red' if e.matched else 'black'
 
     def shrink(self, blossom):
-        old_pos = [self.pos[self.g.vertex(v.id)] for v in blossom]
+        old_pos = [copy.copy(self.pos[self.g.vertex(v.id)]) for v in blossom]
         center = [0, 0]
         for p in old_pos:
             for i in range(2):
@@ -32,11 +33,16 @@ class GraphAnimation:
             center[i] /= len(blossom) 
         for v in blossom:
             self.pos[self.g.vertex(v.id)] = center
+
         return old_pos
+    
+    def expand(self, blossom, old_pos):
+        for i in range(len(blossom)):
+            self.pos[self.g.vertex(blossom[i].id)] = old_pos[i]
 
     def animate(self, callback):
         self.pos = gt.sfdp_layout(self.g)
-        self.win = gt.GraphWindow(self.g, self.pos, geometry=(500,400), edge_color=self.matched)
+        self.win = gt.GraphWindow(self.g, self.pos, geometry=(750,600), edge_color=self.matched, vertex_size=20)
 
         self.win.connect("delete_event", Gtk.main_quit)
         self.win.graph.disconnect_by_func(self.win.graph.button_press_event)
