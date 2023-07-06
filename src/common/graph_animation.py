@@ -22,6 +22,18 @@ class GraphAnimation:
     def switch(self, e):
         self.matched[self.g.edge(e.to.id, e.twin.to.id)] = 'red' if e.matched else 'black'
 
+    def shrink(self, blossom):
+        old_pos = [self.pos[self.g.vertex(v.id)] for v in blossom]
+        center = [0, 0]
+        for p in old_pos:
+            for i in range(2):
+                center[i] += p[i]
+        for i in range(2):
+            center[i] /= len(blossom) 
+        for v in blossom:
+            self.pos[self.g.vertex(v.id)] = center
+        return old_pos
+
     def animate(self, callback):
         self.pos = gt.sfdp_layout(self.g)
         self.win = gt.GraphWindow(self.g, self.pos, geometry=(500,400), edge_color=self.matched)

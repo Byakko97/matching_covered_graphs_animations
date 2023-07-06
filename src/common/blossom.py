@@ -4,7 +4,7 @@ from src.common.vertex import Vertex
 class Blossom(Vertex):
     """Uma floração comprimida"""
 
-    def __init__(self, dsu, cycle, edge_cycle):
+    def __init__(self, dsu, cycle, edge_cycle, animation):
         super().__init__()
         self.cycle = cycle
         self.edge_cycle = edge_cycle
@@ -22,6 +22,18 @@ class Blossom(Vertex):
         dsu.add(self)
         for w in cycle:
             dsu.union(self, w)
+
+        if animation != None:
+            self.old_pos = animation.shrink(self.get_vertices())
+
+    def get_vertices(self):
+        vertices = []
+        for v in self.cycle:
+            if isinstance(v, Blossom):
+                vertices.extend(v.get_vertices())
+            else:
+                vertices.append(v)
+        return vertices
 
     def tip(self):
             return self.cycle[0]

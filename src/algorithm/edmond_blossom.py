@@ -10,6 +10,7 @@ class EdmondsBlossom():
         self.g = g
         self.expansion_list = []
         self.dsu = UnionFind(g.vertices)
+        self.step = 0
 
     def run(self):
         self.__run()
@@ -55,20 +56,32 @@ class EdmondsBlossom():
         return sz
     
     def __update_state(self, widget, event):
-        if not self.augment():
+        if self.step == 0:
+            self.__build_queue()
+            self.step = 1
+        result = self.__iterate()
+        if result == "stop":
             return False
-        
-        self.__expand_all()
-        self.g.animation.update_state()
+        if result == "augment":
+            self.__expand_all()
+            self.step = 0
 
+        self.g.animation.update_state()
         return True
 
     def __run(self):
-        while self.augment():
+        while True:
+            self.__build_queue()
+            while True: # shrink found blossoms
+                result = self.__iterate()
+                if result != "shrink":
+                    break
+            if result == "stop":
+                break 
             self.__expand_all()
 
-    def augment(self):
-        q = deque()
+    def __build_queue(self):
+        self.q = deque()
         
         for v in self.g.vertices:
             v.color = -1
@@ -79,12 +92,11 @@ class EdmondsBlossom():
                 # adiciono os vértices não emparelhados na fila
                 done = False
                 v.color = 0
-                q.append(v)
-        
-        augmenting_path = False
+                self.q.append(v)
 
-        while len(q) > 0:
-            v = q.popleft()
+    def __iterate(self):       
+        while len(self.q) > 0:
+            v = self.q.popleft()
             x = self.dsu.find(v)
             if v != x:
                 # se o vértice foi contraido por outro, já não é válido no novo grafo
@@ -98,25 +110,20 @@ class EdmondsBlossom():
                         self.__switch_match(e)
                         self.__alternate(u)
                         self.__alternate(v)
-                        augmenting_path = True
-                        break
+                        return "augment"
                     else:
                         # contrai a floração
                         cycle, edge_cycle = self.__find_cycle(u, v, e.twin)
-                        blossom = Blossom(self.dsu, cycle, edge_cycle)
-                        q.append(blossom)
-                        break
+                        blossom = Blossom(self.dsu, cycle, edge_cycle, self.g.animation)
+                        self.q.append(blossom)
+                        return "shrink"
                 elif u.color == -1:
                     # extende a árvore alternante
                     self.__add_child(v, u, e)
                     matched_e = u.get_match()
                     self.__add_child(u, matched_e.to, matched_e)
-                    q.append(matched_e.to)
-
-            if augmenting_path == True:
-                break
-
-        return augmenting_path
+                    self.q.append(matched_e.to)
+        return "stop"
 
     def __expand_all(self):
         # expande as florações por onde passou o caminho aumentante
