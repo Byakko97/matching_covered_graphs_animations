@@ -75,6 +75,7 @@ class EdmondsBlossom():
             if len(self.expansion_list) > 0:
                 self.__expand_one()
             if len(self.expansion_list) == 0:
+                self.__expansion_clear()
                 if self.step == 2:
                     self.step = 0
                 else:
@@ -90,9 +91,9 @@ class EdmondsBlossom():
                 result = self.__iterate()
                 if result != "shrink":
                     break
-            self.__expand_all()
             if result == "stop":
                 break 
+            self.__expand_all()
 
     def __build_queue(self):
         self.q = deque()
@@ -104,7 +105,6 @@ class EdmondsBlossom():
             v.depth = 0
             if not v.matched():
                 # adiciono os vértices não emparelhados na fila
-                done = False
                 v.color = 0
                 self.q.append(v)
 
@@ -184,7 +184,6 @@ class EdmondsBlossom():
         self.expansion_set.add(item[0])
 
     def __expansion_clear(self):
-        self.expansion_list = []
         self.expansion_set = set()
 
     def __alternate(self, v):
