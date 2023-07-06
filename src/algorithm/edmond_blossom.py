@@ -9,6 +9,7 @@ class EdmondsBlossom():
     def __init__(self, g):
         self.g = g
         self.expansion_list = []
+        self.expansion_set = set()
         self.dsu = UnionFind(g.vertices)
         self.step = 0
 
@@ -56,19 +57,28 @@ class EdmondsBlossom():
         return sz
     
     def __update_state(self, widget, event):
-        if self.step == 2:
+        if self.step == 4:
             return False
-        
+
         if self.step == 0:
             self.__build_queue()
             self.step = 1
-        result = self.__iterate()
-        if result != "shrink":
-            self.__expand_all()
-            if result == "augment":
-                self.step = 0
-            else:
-                self.step = 2
+        if self.step == 1:
+            result = self.__iterate()
+            if result != "shrink":
+                self.__fill_expansion()
+                if result == "augment":
+                    self.step = 2
+                else:
+                    self.step = 3
+        if self.step >= 2:
+            if len(self.expansion_list) > 0:
+                self.__expand_one()
+            if len(self.expansion_list) == 0:
+                if self.step == 2:
+                    self.step = 0
+                else:
+                    self.step = 4
 
         self.g.animation.update_state()
         return True
@@ -130,16 +140,24 @@ class EdmondsBlossom():
         return "stop"
 
     def __expand_all(self):
-        # expande as florações por onde passou o caminho aumentante
-        for [blossom, expose] in self.expansion_list:
-            blossom.expand(self.g, self.dsu, self.g.animation, expose)
-        self.expansion_list = []
+        self.__fill_expansion()
 
-        # expande o resto de florações
+        # expande as florações
+        while len(self.expansion_list) > 0:
+            self.__expand_one()
+        
+        self.__expansion_clear()
+
+    def __fill_expansion(self):
+        # adiciona todas as florações na lista de expansão
         for v in self.g.vertices:
             x = self.dsu.find(v)
             if isinstance(x, Blossom):
-                x.expand(self.g, self.dsu, self.g.animation)
+                self.__expansion_push([x, None])
+
+    def __expand_one(self):
+        [blossom, expose] = self.expansion_list.pop()
+        blossom.expand(self.g, self.dsu, self.g.animation, expose, self.__expansion_push)
 
     def __add_child(self, v, u, e):
         u.root = v.root
@@ -156,8 +174,18 @@ class EdmondsBlossom():
             for _ in range(2):
                 v = self.dsu.find(f.to)
                 if isinstance(v, Blossom):
-                    self.expansion_list.append([v, f.to])
+                    self.__expansion_push([v, f.to])
                 f = e.twin
+
+    def __expansion_push(self, item):
+        if item[0] in self.expansion_set:
+            return
+        self.expansion_list.append(item)
+        self.expansion_set.add(item[0])
+
+    def __expansion_clear(self):
+        self.expansion_list = []
+        self.expansion_set = set()
 
     def __alternate(self, v):
         if v.parent == None:

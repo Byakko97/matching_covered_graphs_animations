@@ -38,7 +38,7 @@ class Blossom(Vertex):
     def tip(self):
             return self.cycle[0]
 
-    def expand(self, g, dsu, animation, expose=None):
+    def expand(self, g, dsu, animation, expose, push):
         # expande a floração deixando o vértice `expose` não emparelhado 
         for v in self.cycle:
             dsu.detach(v)
@@ -61,19 +61,17 @@ class Blossom(Vertex):
                             g.switch(edge)
                         if edge.matched:
                             if isinstance(self.cycle[pos], Blossom):
-                                expansion_list.append([self.cycle[pos], edge.twin.to if change else None])
+                                push([self.cycle[pos], edge.twin.to if change else None])
                             nxt = (pos + 1) % len(self.cycle)
                             if isinstance(self.cycle[nxt], Blossom):
-                                expansion_list.append([self.cycle[nxt], edge.to if change else None])
+                                push([self.cycle[nxt], edge.to if change else None])
 
                         must_match ^= True
                     break
-            for [v, endpoint] in expansion_list:
-                v.expand(g, dsu, animation, endpoint)
         else:
             for v in self.cycle:
                 if isinstance(v, Blossom):
-                    v.expand(g, dsu, animation)
+                    push([v, None])
 
     def print(self):
         print([v.id for v in self.cycle])
