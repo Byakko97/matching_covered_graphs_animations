@@ -42,13 +42,13 @@ class Blossom(Vertex):
         # expande a floração deixando o vértice `expose` não emparelhado 
         for v in self.cycle:
             dsu.detach(v)
-        animation.expand(self.get_vertices(), self.old_pos)
+        if animation != None:
+            animation.expand(self.get_vertices(), self.old_pos)
 
         if expose != None:
-            expansion_list = []
             pivot = dsu.find(expose)
             if isinstance(pivot, Blossom):
-                expansion_list.append([pivot, expose])
+                push([pivot, expose])
             for i in range(len(self.cycle)):
                 if self.cycle[i] == pivot:
                     must_match = False
