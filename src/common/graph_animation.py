@@ -18,6 +18,7 @@ class GraphAnimation:
 
         self.matched_color = self.g.new_edge_property("string")
         self.matched_width = self.g.new_edge_property("float")
+        self.draw_order = self.g.new_edge_property("int")
 
         self.vertex_color = self.g.new_vertex_property("string")
         for v in self.g.vertices():
@@ -27,11 +28,13 @@ class GraphAnimation:
         e = self.g.add_edge(self.g.vertex(u), self.g.vertex(v))
         self.matched_color[e] = 'black'
         self.matched_width[e] = 1.0
+        self.draw_order[e] = 0
 
     def switch(self, e):
         anim_edge = self.g.edge(e.to.id, e.twin.to.id)
         self.matched_color[anim_edge] = 'red' if e.matched else 'black'
         self.matched_width[anim_edge] = 4.0 if e.matched else 1.0
+        self.draw_order[anim_edge] = 1 if e.matched else 0
 
     def color_vertices(self, vertices, color):
         for v in vertices:
@@ -60,7 +63,7 @@ class GraphAnimation:
 
     def animate(self, callback):
         self.pos = gt.sfdp_layout(self.g)
-        self.win = gt.GraphWindow(self.g, self.pos, geometry=(750,600), 
+        self.win = gt.GraphWindow(self.g, self.pos, geometry=(750,600), eorder=self.draw_order,
             vertex_fill_color=self.vertex_color, edge_color=self.matched_color, 
             edge_pen_width=self.matched_width, vertex_size=20)
 
