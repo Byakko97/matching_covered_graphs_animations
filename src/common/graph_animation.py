@@ -40,16 +40,17 @@ class GraphAnimation:
         for v in vertices:
             self.vertex_color[self.g.vertex(v.id)] = color
 
-    def color_alternating(self, edges):
+    def color_alternating(self, edges, undo=False):
         for e in edges:
             if not e.matched:
                 anim_edge = self.g.edge(e.to.id, e.twin.to.id)
-                self.matched_color[anim_edge] = 'blue'
-                self.matched_width[anim_edge] = 4.0
-                self.draw_order[anim_edge] = 1
+                self.matched_color[anim_edge] = 'blue' if not undo else 'black'
+                self.matched_width[anim_edge] = 4.0 if not undo else 1.0
+                self.draw_order[anim_edge] = 1 if not undo else 0
 
-    def shrink(self, blossom):
+    def shrink(self, blossom, edges):
         self.color_vertices(blossom, "red")
+        self.color_alternating(edges, undo=True)
 
         old_pos = [copy.copy(self.pos[self.g.vertex(v.id)]) for v in blossom]
         center = [0, 0]

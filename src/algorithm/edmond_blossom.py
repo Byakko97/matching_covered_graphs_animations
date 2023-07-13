@@ -68,7 +68,9 @@ class EdmondsBlossom():
 
         if self.step == "search":
             self.step = self.__iterate()
-            if self.step != "shrink":
+            if self.step == "shrink":
+                self.g.animation.color_alternating(self.__path_to_root(self.blossom.tip()))
+            else:
                 if self.step == "augment":
                     self.g.animation.color_alternating(self.__augmenting_path())
                 else:
@@ -78,6 +80,7 @@ class EdmondsBlossom():
                     else:
                         self.step = "end"
         elif self.step == "shrink":
+            self.g.animation.color_alternating(self.__path_to_root(self.blossom.tip()), undo=True)
             self.blossom.shrink_animation(self.g.animation)
             self.step = "search"
         elif self.step == "augment":
@@ -166,13 +169,15 @@ class EdmondsBlossom():
 
     def __augmenting_path(self):
         u, v, e = self.augmenting
-        edges_u = []
-        edges_v = []
-        while u.parent != None:
-            u = self.__go_up(u, edges_u, None)
-        while v.parent != None:
-            v = self.__go_up(v, edges_v, None)
+        edges_u = self.__path_to_root(u)
+        edges_v = self.__path_to_root(v)
         return edges_u[::-1] + [e] + edges_v
+    
+    def __path_to_root(self, v):
+        edges = []
+        while v.parent != None:
+            v = self.__go_up(v, edges, None)
+        return edges
 
     def __expand_all(self):
         self.__fill_expansion()
