@@ -11,7 +11,8 @@ class EdmondsBlossom():
         self.expansion_list = []
         self.expansion_set = set()
         self.dsu = UnionFind(g.vertices)
-        self.step = 0
+        self.step = "begin"
+        self.blossom = None
 
     def run(self):
         self.__run()
@@ -57,29 +58,42 @@ class EdmondsBlossom():
         return sz
     
     def __update_state(self, widget, event):
-        if self.step == 4:
+        if self.step == "end":
             return False
 
-        if self.step == 0:
+        if self.step == "begin":
             self.__build_queue()
-            self.step = 1
-        if self.step == 1:
-            result = self.__iterate()
-            if result != "shrink":
+            self.step = "search"
+
+        if self.step == "search":
+            self.step = self.__iterate()
+            if self.step == "shrink":
+                pass
+            else:
                 self.__fill_expansion()
-                if result == "augment":
-                    self.step = 2
+                if self.step == "augment":
+                    pass
+                elif len(self.expansion_list) > 0:
+                    self.step = "last expand"
                 else:
-                    self.step = 3
-        if self.step >= 2:
+                    self.step = "end"
+        elif self.step == "shrink":
+            self.blossom.shrink_animation(self.g.animation)
+            self.step = "search"
+        elif self.step == "augment":
+            self.step = "expand"
+            self.g.animation.update_state()
+            return True
+
+        if self.step == "expand" or self.step == "expand last":
             if len(self.expansion_list) > 0:
                 self.__expand_one()
             if len(self.expansion_list) == 0:
                 self.__expansion_clear()
-                if self.step == 2:
-                    self.step = 0
+                if self.step == "expand":
+                    self.step = "begin"
                 else:
-                    self.step = 4
+                    self.step = "end"
 
         self.g.animation.update_state()
         return True
@@ -128,8 +142,8 @@ class EdmondsBlossom():
                     else:
                         # contrai a floração
                         cycle, edge_cycle = self.__find_cycle(u, v, e.twin)
-                        blossom = Blossom(self.dsu, cycle, edge_cycle, self.g.animation)
-                        self.q.append(blossom)
+                        self.blossom = Blossom(self.dsu, cycle, edge_cycle, self.g.animation)
+                        self.q.append(self.blossom)
                         return "shrink"
                 elif u.color == -1:
                     # extende a árvore alternante

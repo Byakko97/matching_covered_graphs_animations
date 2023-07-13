@@ -24,7 +24,11 @@ class Blossom(Vertex):
             dsu.union(self, w)
 
         if animation != None:
-            self.old_pos = animation.shrink(self.get_vertices())
+            self.old_pos = None
+            animation.color_vertices(self.get_vertices(), 'yellow')
+
+    def shrink_animation(self, animation):
+        self.old_pos = animation.shrink(self.get_vertices())
 
     def get_vertices(self):
         vertices = []
@@ -43,7 +47,7 @@ class Blossom(Vertex):
         for v in self.cycle:
             dsu.detach(v)
         if animation != None:
-            animation.expand(self.get_vertices(), self.old_pos)
+            animation.expand(self.get_vertices(), self.old_pos, dsu)
 
         if expose != None:
             pivot = dsu.find(expose)
