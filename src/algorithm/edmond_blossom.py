@@ -13,6 +13,7 @@ class EdmondsBlossom():
         self.dsu = UnionFind(g.vertices)
         self.step = "begin"
         self.blossom = None
+        self.augmenting = None
 
     def run(self):
         self.__run()
@@ -67,25 +68,29 @@ class EdmondsBlossom():
 
         if self.step == "search":
             self.step = self.__iterate()
-            if self.step == "shrink":
-                pass
-            else:
-                self.__fill_expansion()
+            if self.step != "shrink":
                 if self.step == "augment":
-                    pass
-                elif len(self.expansion_list) > 0:
-                    self.step = "last expand"
+                    self.g.animation.color_alternating(self.__augmenting_path())
                 else:
-                    self.step = "end"
+                    self.__fill_expansion()
+                    if len(self.expansion_list) > 0:
+                        self.step = "last expand"
+                    else:
+                        self.step = "end"
         elif self.step == "shrink":
             self.blossom.shrink_animation(self.g.animation)
             self.step = "search"
         elif self.step == "augment":
-            self.step = "expand"
+            self.__augment()
+            self.__fill_expansion()
+            if len(self.expansion_list) > 0:
+                self.step = "expand"
+            else:
+                self.step = "begin"
             self.g.animation.update_state()
             return True
 
-        if self.step == "expand" or self.step == "expand last":
+        if self.step == "expand" or self.step == "last expand":
             if len(self.expansion_list) > 0:
                 self.__expand_one()
             if len(self.expansion_list) == 0:
@@ -104,6 +109,8 @@ class EdmondsBlossom():
             while True: # shrink found blossoms
                 result = self.__iterate()
                 if result != "shrink":
+                    if result == "augment":
+                        self.__augment()
                     break
             if result == "stop":
                 break 
@@ -135,9 +142,7 @@ class EdmondsBlossom():
                 if u.color == 0:
                     if u.root != v.root:
                         # caminho aumentante achado
-                        self.__switch_match(e)
-                        self.__alternate(u)
-                        self.__alternate(v)
+                        self.augmenting = [u, v, e]
                         return "augment"
                     else:
                         # contrai a floração
@@ -152,6 +157,22 @@ class EdmondsBlossom():
                     self.__add_child(u, matched_e.to, matched_e)
                     self.q.append(matched_e.to)
         return "stop"
+    
+    def __augment(self):
+        u, v, e = self.augmenting
+        self.__switch_match(e)
+        self.__alternate(u)
+        self.__alternate(v)
+
+    def __augmenting_path(self):
+        u, v, e = self.augmenting
+        edges_u = []
+        edges_v = []
+        while u.parent != None:
+            u = self.__go_up(u, edges_u, None)
+        while v.parent != None:
+            v = self.__go_up(v, edges_v, None)
+        return edges_u[::-1] + [e] + edges_v
 
     def __expand_all(self):
         self.__fill_expansion()
@@ -207,8 +228,10 @@ class EdmondsBlossom():
         self.__alternate(self.dsu.find(v.parent.to))
 
     def __go_up(self, u, edges, path):
-        path.append(u)
-        edges.append(u.parent)
+        if path != None:
+            path.append(u)
+        if edges != None:
+            edges.append(u.parent)
         return self.dsu.find(u.parent.to)
 
     def __find_cycle(self, u, v, u_to_v):
