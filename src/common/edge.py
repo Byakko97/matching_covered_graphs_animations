@@ -11,6 +11,7 @@ class Edge:
         return self.endpoints[i]
 
     def switch(self):
-        """muda o estado da aresta de emparelhado a não empralehado e viceversa"""
+        """muda o estado da aresta de emparelhado a não empralehado
+           e viceversa"""
         self.matched ^= True
         self.twin.matched ^= True

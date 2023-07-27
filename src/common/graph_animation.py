@@ -5,11 +5,12 @@ from gi.repository import Gtk
 
 from src.common.blossom import Blossom
 
+
 class GraphAnimation:
     """Animação de um grafo"""
 
     def __init__(self, n=0):
-        self.g = gt.Graph(directed = False)
+        self.g = gt.Graph(directed=False)
         if n > 0: 
             self.g.add_vertex(n)
 
@@ -58,23 +59,29 @@ class GraphAnimation:
             for i in range(2):
                 center[i] += p[i]
         for i in range(2):
-            center[i] /= len(blossom) 
+            center[i] /= len(blossom)
         for v in blossom:
             self.pos[self.g.vertex(v.id)] = center
 
         return old_pos
-    
+
     def expand(self, blossom, old_pos, dsu):
         for i in range(len(blossom)):
             self.pos[self.g.vertex(blossom[i].id)] = old_pos[i]
             self.vertex_color[self.g.vertex(blossom[i].id)] \
-                = "red" if isinstance(dsu.find(blossom[i]), Blossom) else "black"
+                = "red" if isinstance(dsu.find(blossom[i]), Blossom) \
+                else "black"
 
     def animate(self, callback):
         self.pos = gt.sfdp_layout(self.g)
-        self.win = gt.GraphWindow(self.g, self.pos, geometry=(750,600), eorder=self.draw_order,
-            vertex_fill_color=self.vertex_color, edge_color=self.matched_color, 
-            edge_pen_width=self.matched_width, vertex_size=20)
+        self.win = gt.GraphWindow(
+                    self.g, self.pos, geometry=(750, 600),
+                    eorder=self.draw_order,
+                    vertex_fill_color=self.vertex_color,
+                    edge_color=self.matched_color,
+                    edge_pen_width=self.matched_width,
+                    vertex_size=20,
+                    )
 
         self.win.connect("delete_event", Gtk.main_quit)
         self.win.graph.disconnect_by_func(self.win.graph.button_press_event)

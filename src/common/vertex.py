@@ -1,7 +1,7 @@
 class Vertex:
     """Um vértice de um grafo"""
 
-    def __init__(self, id = None):
+    def __init__(self, id=None):
         self.id = id
         self.adjacency = []
         self.color = -1
@@ -19,6 +19,6 @@ class Vertex:
         """Devolve a aresta emparelhada incidente no vértice"""
         e = filter(lambda edge: edge.matched, self.adjacency)
         return list(e)[0]
-    
+
     def print(self):
         print(self.id)

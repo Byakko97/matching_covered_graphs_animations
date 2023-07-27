@@ -4,6 +4,7 @@ from collections import deque
 from src.common.blossom import Blossom
 from src.common.union_find import UnionFind
 
+
 class EdmondsBlossom():
 
     def __init__(self, g):
@@ -32,7 +33,8 @@ class EdmondsBlossom():
             if count_match > 1:
                 print("The set of edges")
                 self.g.print_matching()
-                print("is not a matching since " + str(v.id) + " has more than one incident edge of that set.")
+                print("is not a matching since " + str(v.id) +
+                      " has more than one incident edge of that set.")
                 return False
             deficiency += count_match == 0
             if v.color == 1 and not isinstance(self.dsu.find(v), Blossom):
@@ -40,12 +42,12 @@ class EdmondsBlossom():
 
         odd = 0
         for v in self.g.vertices:
-            if v.color != 3 and not v in barrier:
+            if v.color != 3 and v not in barrier:
                 # color 3 indicates that the vertex was already counted
                 odd += self.__count_size(v, barrier) & 1
 
         if deficiency != odd - len(barrier):
-                return False
+            return False
 
         return True
 
@@ -54,10 +56,10 @@ class EdmondsBlossom():
         sz = 1
         for e in v.adjacency:
             u = e.to
-            if u.color != 3 and not u in barrier:
+            if u.color != 3 and u not in barrier:
                 sz += self.__count_size(u, barrier)
         return sz
-    
+
     def __update_state(self, widget, event):
         if self.step == "end":
             return False
@@ -69,10 +71,14 @@ class EdmondsBlossom():
         if self.step == "search":
             self.step = self.__iterate()
             if self.step == "shrink":
-                self.g.animation.color_alternating(self.__path_to_root(self.blossom.tip()))
+                self.g.animation.color_alternating(
+                    self.__path_to_root(self.blossom.tip())
+                    )
             else:
                 if self.step == "augment":
-                    self.g.animation.color_alternating(self.__augmenting_path())
+                    self.g.animation.color_alternating(
+                        self.__augmenting_path()
+                        )
                 else:
                     self.__fill_expansion()
                     if len(self.expansion_list) > 0:
@@ -80,7 +86,9 @@ class EdmondsBlossom():
                     else:
                         self.step = "end"
         elif self.step == "shrink":
-            self.g.animation.color_alternating(self.__path_to_root(self.blossom.tip()), undo=True)
+            self.g.animation.color_alternating(
+                self.__path_to_root(self.blossom.tip()), undo=True
+                )
             self.blossom.shrink_animation(self.g.animation)
             self.step = "search"
         elif self.step == "augment":
@@ -109,19 +117,19 @@ class EdmondsBlossom():
     def __run(self):
         while True:
             self.__build_queue()
-            while True: # shrink found blossoms
+            while True:  # shrink found blossoms
                 result = self.__iterate()
                 if result != "shrink":
                     if result == "augment":
                         self.__augment()
                     break
             if result == "stop":
-                break 
+                break
             self.__expand_all()
 
     def __build_queue(self):
         self.q = deque()
-        
+
         for v in self.g.vertices:
             v.color = -1
             v.parent = None
@@ -132,12 +140,13 @@ class EdmondsBlossom():
                 v.color = 0
                 self.q.append(v)
 
-    def __iterate(self):       
+    def __iterate(self):
         while len(self.q) > 0:
             v = self.q.popleft()
             x = self.dsu.find(v)
             if v != x:
-                # se o vértice foi contraido por outro, já não é válido no novo grafo
+                # se o vértice foi contraido por outro,
+                # já não é válido no novo grafo
                 continue
             v = x
             for e in v.adjacency:
@@ -150,7 +159,9 @@ class EdmondsBlossom():
                     else:
                         # contrai a floração
                         cycle, edge_cycle = self.__find_cycle(u, v, e.twin)
-                        self.blossom = Blossom(self.dsu, cycle, edge_cycle, self.g.animation)
+                        self.blossom = Blossom(
+                            self.dsu, cycle, edge_cycle, self.g.animation
+                            )
                         self.q.append(self.blossom)
                         return "shrink"
                 elif u.color == -1:
@@ -160,7 +171,7 @@ class EdmondsBlossom():
                     self.__add_child(u, matched_e.to, matched_e)
                     self.q.append(matched_e.to)
         return "stop"
-    
+
     def __augment(self):
         u, v, e = self.augmenting
         self.__switch_match(e)
@@ -172,10 +183,10 @@ class EdmondsBlossom():
         edges_u = self.__path_to_root(u)
         edges_v = self.__path_to_root(v)
         return edges_u[::-1] + [e] + edges_v
-    
+
     def __path_to_root(self, v):
         edges = []
-        while v.parent != None:
+        while v.parent is not None:
             v = self.__go_up(v, edges, None)
         return edges
 
@@ -185,7 +196,7 @@ class EdmondsBlossom():
         # expande as florações
         while len(self.expansion_list) > 0:
             self.__expand_one()
-        
+
         self.__expansion_clear()
 
     def __fill_expansion(self):
@@ -197,7 +208,9 @@ class EdmondsBlossom():
 
     def __expand_one(self):
         [blossom, expose] = self.expansion_list.pop()
-        blossom.expand(self.g, self.dsu, self.g.animation, expose, self.__expansion_push)
+        blossom.expand(
+            self.g, self.dsu, self.g.animation, expose, self.__expansion_push
+            )
 
     def __add_child(self, v, u, e):
         u.root = v.root
@@ -227,15 +240,15 @@ class EdmondsBlossom():
         self.expansion_set = set()
 
     def __alternate(self, v):
-        if v.parent == None:
+        if v.parent is None:
             return
         self.__switch_match(v.parent)
         self.__alternate(self.dsu.find(v.parent.to))
 
     def __go_up(self, u, edges, path):
-        if path != None:
+        if path is not None:
             path.append(u)
-        if edges != None:
+        if edges is not None:
             edges.append(u.parent)
         return self.dsu.find(u.parent.to)
 

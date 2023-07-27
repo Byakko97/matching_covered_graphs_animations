@@ -1,6 +1,7 @@
 
 from src.common.vertex import Vertex
 
+
 class Blossom(Vertex):
     """Uma floração comprimida"""
 
@@ -23,7 +24,7 @@ class Blossom(Vertex):
         for w in cycle:
             dsu.union(self, w)
 
-        if animation != None:
+        if animation is not None:
             self.old_pos = None
             animation.color_vertices(self.get_vertices(), 'yellow')
             animation.color_alternating(self.edge_cycle)
@@ -41,16 +42,16 @@ class Blossom(Vertex):
         return vertices
 
     def tip(self):
-            return self.cycle[0]
+        return self.cycle[0]
 
     def expand(self, g, dsu, animation, expose, push):
-        # expande a floração deixando o vértice `expose` não emparelhado 
+        # expande a floração deixando o vértice `expose` não emparelhado
         for v in self.cycle:
             dsu.detach(v)
-        if animation != None:
+        if animation is not None:
             animation.expand(self.get_vertices(), self.old_pos, dsu)
 
-        if expose != None:
+        if expose is not None:
             pivot = dsu.find(expose)
             if isinstance(pivot, Blossom):
                 push([pivot, expose])
@@ -66,10 +67,12 @@ class Blossom(Vertex):
                             g.switch(edge)
                         if edge.matched:
                             if isinstance(self.cycle[pos], Blossom):
-                                push([self.cycle[pos], edge.twin.to if change else None])
+                                push([self.cycle[pos], edge.twin.to if change
+                                      else None])
                             nxt = (pos + 1) % len(self.cycle)
                             if isinstance(self.cycle[nxt], Blossom):
-                                push([self.cycle[nxt], edge.to if change else None])
+                                push([self.cycle[nxt], edge.to if change
+                                      else None])
 
                         must_match ^= True
                     break
