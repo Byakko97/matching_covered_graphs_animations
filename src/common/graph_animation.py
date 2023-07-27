@@ -11,7 +11,7 @@ class GraphAnimation:
 
     def __init__(self, n=0):
         self.g = gt.Graph(directed=False)
-        if n > 0: 
+        if n > 0:
             self.g.add_vertex(n)
 
         self.pos = None
