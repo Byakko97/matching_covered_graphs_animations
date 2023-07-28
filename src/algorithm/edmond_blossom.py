@@ -23,9 +23,11 @@ class EdmondsBlossom():
     def animate(self):
         self.g.animation.animate(self.__update_state)
 
-    def verify(self):
+    def test(self):
         self.__run()
+        return self.verify()
 
+    def verify(self):
         deficiency = 0
         barrier = set()
         for v in self.g.vertices:
@@ -48,6 +50,9 @@ class EdmondsBlossom():
 
         if deficiency != odd - len(barrier):
             return False
+
+        if self.g.animation is not None:
+            self.g.animation.color_vertices(barrier, "cyan")
 
         return True
 
@@ -80,6 +85,7 @@ class EdmondsBlossom():
                         self.__augmenting_path()
                         )
                 else:
+                    assert self.verify()
                     self.__fill_expansion()
                     if len(self.expansion_list) > 0:
                         self.step = "last expand"

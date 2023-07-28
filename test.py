@@ -21,7 +21,7 @@ for test_id in listdir("tests/"):
     print(test_id, ": ", end='')
 
     algo = EdmondsBlossom(g)
-    if algo.verify():
+    if algo.test():
         print("OK")
     else:
         print("FAILED")
