@@ -1,7 +1,7 @@
 import graph_tool.all as gt
 import copy
 
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib
 
 from src.common.blossom import Blossom
 
@@ -72,7 +72,7 @@ class GraphAnimation:
                 = "red" if isinstance(dsu.find(blossom[i]), Blossom) \
                 else "black"
 
-    def animate(self, callback):
+    def animate(self, callback, manual_mode, speed):
         self.pos = gt.sfdp_layout(self.g)
         self.win = gt.GraphWindow(
                     self.g, self.pos, geometry=(750, 600),
@@ -85,9 +85,12 @@ class GraphAnimation:
 
         self.win.connect("delete_event", Gtk.main_quit)
         self.win.graph.disconnect_by_func(self.win.graph.button_press_event)
-        self.win.connect("button_press_event", callback)
-        self.win.show_all()
+        if manual_mode:
+            self.win.connect("button_press_event", callback)
+        else:
+            GLib.timeout_add(speed, callback, None, None)
 
+        self.win.show_all()
         Gtk.main()
 
     def update_state(self):

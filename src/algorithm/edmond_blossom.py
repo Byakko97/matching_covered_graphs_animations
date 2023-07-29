@@ -20,8 +20,8 @@ class EdmondsBlossom():
         self.__run()
         self.g.print_matching()
 
-    def animate(self):
-        self.g.animation.animate(self.__update_state)
+    def animate(self, manual_mode, speed):
+        self.g.animation.animate(self.__update_state, manual_mode, speed)
 
     def test(self):
         self.__run()

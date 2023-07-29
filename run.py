@@ -8,20 +8,11 @@ parser = argparse.ArgumentParser(description="Run algorithm with input")
 parser.add_argument(
     "algorithm", choices=["edmonds"], help="Algorithm to be runned"
     )
-parser.add_argument("test_id", help="Test id")
-parser.add_argument(
-    "-a", "--animate", dest="animate", action="store_true",
-    help="Animate the algorithm"
-    )
+parser.add_argument("test_name", help="Test name")
 args = parser.parse_args()
 
-sys.stdin = open("tests/" + args.test_id, "r")
+sys.stdin = open("tests/" + args.test_name, "r")
 
-g = Graph(read=True, animate=args.animate)
-
+g = Graph(read=True)
 algo = EdmondsBlossom(g)
-
-if args.animate:
-    algo.animate()
-else:
-    algo.run()
+algo.run()
