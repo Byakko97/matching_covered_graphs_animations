@@ -51,7 +51,7 @@ class Graph:
         if self.animation is not None:
             self.animation.color_vertices(vertices, color)
 
-    def color_alternating(self, path, undo):
+    def color_alternating(self, path, undo=False):
         if self.animation is not None:
             self.animation.color_alternating(path, undo)
 
