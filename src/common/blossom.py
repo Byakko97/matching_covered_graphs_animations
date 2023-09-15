@@ -30,7 +30,10 @@ class Blossom(Vertex):
             animation.color_alternating(self.edge_cycle)
 
     def shrink_animation(self, animation):
-        self.old_pos = animation.shrink(self.get_vertices(), self.edge_cycle)
+        if animation is not None:
+            self.old_pos = animation.shrink(
+                self.get_vertices(), self.edge_cycle,
+            )
 
     def get_vertices(self):
         vertices = []
