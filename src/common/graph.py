@@ -46,3 +46,15 @@ class Graph:
             for e in v.adjacency:
                 if e.matched and e.to.id > v.id:
                     print(v.id, e.to.id)
+
+    def color_vertices(self, vertices, color):
+        if self.animation is not None:
+            self.animation.color_vertices(vertices, color)
+
+    def color_alternating(self, path, undo):
+        if self.animation is not None:
+            self.animation.color_alternating(path, undo)
+
+    def update_animation_state(self):
+        if self.animation is not None:
+            self.animation.update_state()
