@@ -1,6 +1,8 @@
 
 from src.common.vertex import Vertex
 
+FLOWER_COLOR = "yellow"
+
 
 class Blossom(Vertex):
     """Uma floração comprimida"""
@@ -26,7 +28,7 @@ class Blossom(Vertex):
 
         if animation is not None:
             self.old_pos = None
-            animation.color_vertices(self.get_vertices(), 'yellow')
+            animation.color_vertices(self.get_vertices(), FLOWER_COLOR)
             animation.color_alternating(self.edge_cycle)
 
     def shrink_animation(self, animation):

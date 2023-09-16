@@ -5,6 +5,14 @@ from gi.repository import Gtk, GLib
 
 from src.common.blossom import Blossom
 
+VERTEX_COLOR = "black"
+BLOSSOM_COLOR = "red"
+UNMATCHED_COLOR = "black"
+EDGE_WIDTH = 1
+MATCHED_COLOR = "red"
+HIGHLIGHT_WIDTH = 4
+HIGHLIGHT_COLOR = "blue"
+
 
 class GraphAnimation:
     """Animação de um grafo"""
@@ -23,34 +31,42 @@ class GraphAnimation:
 
         self.vertex_color = self.g.new_vertex_property("string")
         for v in self.g.vertices():
-            self.vertex_color[v] = 'black'
+            self.vertex_color[v] = VERTEX_COLOR
 
     def add_edge(self, u, v):
         e = self.g.add_edge(self.g.vertex(u), self.g.vertex(v))
-        self.matched_color[e] = 'black'
-        self.matched_width[e] = 1.0
+        self.matched_color[e] = UNMATCHED_COLOR
+        self.matched_width[e] = EDGE_WIDTH
         self.draw_order[e] = 0
 
     def switch(self, e):
         anim_edge = self.g.edge(e.to.id, e.twin.to.id)
-        self.matched_color[anim_edge] = 'red' if e.matched else 'black'
-        self.matched_width[anim_edge] = 4.0 if e.matched else 1.0
+        self.matched_color[anim_edge] = (
+            MATCHED_COLOR if e.matched else UNMATCHED_COLOR
+        )
+        self.matched_width[anim_edge] = (
+            HIGHLIGHT_WIDTH if e.matched else EDGE_WIDTH
+        )
         self.draw_order[anim_edge] = 1 if e.matched else 0
 
     def color_vertices(self, vertices, color):
         for v in vertices:
             self.vertex_color[self.g.vertex(v.id)] = color
 
-    def color_alternating(self, edges, undo=False):
-        for e in edges:
+    def color_alternating(self, path, undo=False):
+        for e in path:
             if not e.matched:
                 anim_edge = self.g.edge(e.to.id, e.twin.to.id)
-                self.matched_color[anim_edge] = 'blue' if not undo else 'black'
-                self.matched_width[anim_edge] = 4.0 if not undo else 1.0
+                self.matched_color[anim_edge] = (
+                    HIGHLIGHT_COLOR if not undo else UNMATCHED_COLOR
+                )
+                self.matched_width[anim_edge] = (
+                    HIGHLIGHT_WIDTH if not undo else EDGE_WIDTH
+                )
                 self.draw_order[anim_edge] = 1 if not undo else 0
 
     def shrink(self, blossom, edges):
-        self.color_vertices(blossom, "red")
+        self.color_vertices(blossom, BLOSSOM_COLOR)
         self.color_alternating(edges, undo=True)
 
         old_pos = [copy.copy(self.pos[self.g.vertex(v.id)]) for v in blossom]
@@ -68,9 +84,10 @@ class GraphAnimation:
     def expand(self, blossom, old_pos, dsu):
         for i in range(len(blossom)):
             self.pos[self.g.vertex(blossom[i].id)] = old_pos[i]
-            self.vertex_color[self.g.vertex(blossom[i].id)] \
-                = "red" if isinstance(dsu.find(blossom[i]), Blossom) \
-                else "black"
+            self.vertex_color[self.g.vertex(blossom[i].id)] = (
+                BLOSSOM_COLOR if isinstance(dsu.find(blossom[i]), Blossom)
+                else VERTEX_COLOR
+            )
 
     def animate(self, callback, manual_mode, speed):
         self.pos = gt.sfdp_layout(self.g)
