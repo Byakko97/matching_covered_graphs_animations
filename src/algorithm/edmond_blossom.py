@@ -26,7 +26,7 @@ class EdmondsBlossom():
 
     def test(self):
         self.run_algorithm()
-        return self.verify()
+        return self.step != "fail"
 
     def run_algorithm(self):
         while self.update_state(None, None):
@@ -62,12 +62,12 @@ class EdmondsBlossom():
 
     def count_size(self, v, barrier):
         v.color = 3
-        sz = 1
+        size = 1
         for e in v.adjacency:
             u = e.to
             if u.color != 3 and u not in barrier:
-                sz += self.count_size(u, barrier)
-        return sz
+                size += self.count_size(u, barrier)
+        return size
 
     def update_state(self, widget, event):
         if self.step == "end":
@@ -85,6 +85,9 @@ class EdmondsBlossom():
                 if self.step == "augment":
                     self.g.color_alternating(self.augmenting_path())
                 else:
+                    if not self.verify():
+                        self.step = "fail"
+                        return False
                     self.fill_expansion()
                     if len(self.expansion_list) > 0:
                         self.step = "last expand"
