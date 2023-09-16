@@ -1,7 +1,6 @@
 
 from src.common.vertex import Vertex
-
-FLOWER_COLOR = "yellow"
+from src.common.constants import FLOWER_COLOR
 
 
 class Blossom(Vertex):

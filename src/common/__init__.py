@@ -8,4 +8,5 @@ Módulos disponíveis:
 - graph_animation:  classe que define a animação de um grafo
 - union_find:       classe com implementaçao especial de union-find
 - vertex:           classe que define um vértice
+- constants:        constantes usadas na animação dos algoritmos
 """

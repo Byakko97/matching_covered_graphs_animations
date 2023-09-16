@@ -4,14 +4,15 @@ import copy
 from gi.repository import Gtk, GLib
 
 from src.common.blossom import Blossom
-
-VERTEX_COLOR = "black"
-BLOSSOM_COLOR = "red"
-UNMATCHED_COLOR = "black"
-EDGE_WIDTH = 1
-MATCHED_COLOR = "red"
-HIGHLIGHT_WIDTH = 4
-HIGHLIGHT_COLOR = "blue"
+from src.common.constants import (
+    VERTEX_COLOR,
+    BLOSSOM_COLOR,
+    UNMATCHED_COLOR,
+    EDGE_WIDTH,
+    MATCHED_COLOR,
+    HIGHLIGHT_WIDTH,
+    HIGHLIGHT_COLOR,
+)
 
 
 class GraphAnimation:

@@ -3,6 +3,7 @@ from collections import deque
 
 from src.common.blossom import Blossom
 from src.common.union_find import UnionFind
+from src.common.constants import BARRIER_COLOR
 
 
 class EdmondsBlossom():
@@ -55,7 +56,7 @@ class EdmondsBlossom():
         if deficiency != odd - len(barrier):
             return False
 
-        self.g.color_vertices(barrier, "cyan")
+        self.g.color_vertices(barrier, BARRIER_COLOR)
 
         return True
 
