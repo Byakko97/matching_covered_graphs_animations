@@ -17,15 +17,19 @@ class EdmondsBlossom():
         self.augmenting = None
 
     def run(self):
-        self.__run()
+        self.run_algorithm()
         self.g.print_matching()
 
     def animate(self, manual_mode, speed):
-        self.g.animation.animate(self.__update_state, manual_mode, speed)
+        self.g.animation.animate(self.update_state, manual_mode, speed)
 
     def test(self):
-        self.__run()
+        self.run_algorithm()
         return self.verify()
+
+    def run_algorithm(self):
+        while self.update_state(None, None):
+            pass
 
     def verify(self):
         deficiency = 0
@@ -46,94 +50,76 @@ class EdmondsBlossom():
         for v in self.g.vertices:
             if v.color != 3 and v not in barrier:
                 # color 3 indicates that the vertex was already counted
-                odd += self.__count_size(v, barrier) & 1
+                odd += self.count_size(v, barrier) & 1
 
         if deficiency != odd - len(barrier):
             return False
 
-        if self.g.animation is not None:
-            self.g.animation.color_vertices(barrier, "cyan")
+        self.g.color_vertices(barrier, "cyan")
 
         return True
 
-    def __count_size(self, v, barrier):
+    def count_size(self, v, barrier):
         v.color = 3
         sz = 1
         for e in v.adjacency:
             u = e.to
             if u.color != 3 and u not in barrier:
-                sz += self.__count_size(u, barrier)
+                sz += self.count_size(u, barrier)
         return sz
 
-    def __update_state(self, widget, event):
+    def update_state(self, widget, event):
         if self.step == "end":
             return False
 
         if self.step == "begin":
-            self.__build_queue()
+            self.build_queue()
             self.step = "search"
 
         if self.step == "search":
-            self.step = self.__iterate()
+            self.step = self.iterate()
             if self.step == "shrink":
-                self.g.animation.color_alternating(
-                    self.__path_to_root(self.blossom.tip())
-                    )
+                self.g.color_alternating(self.path_to_root(self.blossom.tip()))
             else:
                 if self.step == "augment":
-                    self.g.animation.color_alternating(
-                        self.__augmenting_path()
-                        )
+                    self.g.color_alternating(self.augmenting_path())
                 else:
-                    assert self.verify()
-                    self.__fill_expansion()
+                    self.fill_expansion()
                     if len(self.expansion_list) > 0:
                         self.step = "last expand"
                     else:
                         self.step = "end"
         elif self.step == "shrink":
-            self.g.animation.color_alternating(
-                self.__path_to_root(self.blossom.tip()), undo=True
-                )
+            self.g.color_alternating(
+                self.path_to_root(self.blossom.tip()),
+                undo=True,
+            )
             self.blossom.shrink_animation(self.g.animation)
             self.step = "search"
         elif self.step == "augment":
-            self.__augment()
-            self.__fill_expansion()
+            self.augment()
+            self.fill_expansion()
             if len(self.expansion_list) > 0:
                 self.step = "expand"
             else:
                 self.step = "begin"
-            self.g.animation.update_state()
+            self.g.update_animation_state()
             return True
 
         if self.step == "expand" or self.step == "last expand":
             if len(self.expansion_list) > 0:
-                self.__expand_one()
+                self.expand_one()
             if len(self.expansion_list) == 0:
-                self.__expansion_clear()
+                self.expansion_clear()
                 if self.step == "expand":
                     self.step = "begin"
                 else:
                     self.step = "end"
 
-        self.g.animation.update_state()
+        self.g.update_animation_state()
         return True
 
-    def __run(self):
-        while True:
-            self.__build_queue()
-            while True:  # shrink found blossoms
-                result = self.__iterate()
-                if result != "shrink":
-                    if result == "augment":
-                        self.__augment()
-                    break
-            if result == "stop":
-                break
-            self.__expand_all()
-
-    def __build_queue(self):
+    def build_queue(self):
         self.q = deque()
 
         for v in self.g.vertices:
@@ -146,7 +132,7 @@ class EdmondsBlossom():
                 v.color = 0
                 self.q.append(v)
 
-    def __iterate(self):
+    def iterate(self):
         while len(self.q) > 0:
             v = self.q.popleft()
             x = self.dsu.find(v)
@@ -164,67 +150,58 @@ class EdmondsBlossom():
                         return "augment"
                     else:
                         # contrai a floração
-                        cycle, edge_cycle = self.__find_cycle(u, v, e.twin)
+                        cycle, edge_cycle = self.find_cycle(u, v, e.twin)
                         self.blossom = Blossom(
                             self.dsu, cycle, edge_cycle, self.g.animation
-                            )
+                        )
                         self.q.append(self.blossom)
                         return "shrink"
                 elif u.color == -1:
                     # extende a árvore alternante
-                    self.__add_child(v, u, e)
+                    self.add_child(v, u, e)
                     matched_e = u.get_match()
-                    self.__add_child(u, matched_e.to, matched_e)
+                    self.add_child(u, matched_e.to, matched_e)
                     self.q.append(matched_e.to)
         return "stop"
 
-    def __augment(self):
+    def augment(self):
         u, v, e = self.augmenting
-        self.__switch_match(e)
-        self.__alternate(u)
-        self.__alternate(v)
+        self.switch_match(e)
+        self.alternate(u)
+        self.alternate(v)
 
-    def __augmenting_path(self):
+    def augmenting_path(self):
         u, v, e = self.augmenting
-        edges_u = self.__path_to_root(u)
-        edges_v = self.__path_to_root(v)
+        edges_u = self.path_to_root(u)
+        edges_v = self.path_to_root(v)
         return edges_u[::-1] + [e] + edges_v
 
-    def __path_to_root(self, v):
+    def path_to_root(self, v):
         edges = []
         while v.parent is not None:
-            v = self.__go_up(v, edges, None)
+            v = self.go_up(v, edges, None)
         return edges
 
-    def __expand_all(self):
-        self.__fill_expansion()
-
-        # expande as florações
-        while len(self.expansion_list) > 0:
-            self.__expand_one()
-
-        self.__expansion_clear()
-
-    def __fill_expansion(self):
+    def fill_expansion(self):
         # adiciona todas as florações na lista de expansão
         for v in self.g.vertices:
             x = self.dsu.find(v)
             if isinstance(x, Blossom):
-                self.__expansion_push([x, None])
+                self.expansion_push([x, None])
 
-    def __expand_one(self):
+    def expand_one(self):
         [blossom, expose] = self.expansion_list.pop()
         blossom.expand(
-            self.g, self.dsu, self.g.animation, expose, self.__expansion_push
-            )
+            self.g, self.dsu, self.g.animation, expose, self.expansion_push
+        )
 
-    def __add_child(self, v, u, e):
+    def add_child(self, v, u, e):
         u.root = v.root
         u.parent = e.twin
         u.color = 1 - v.color
         u.depth = v.depth + 1
 
-    def __switch_match(self, e):
+    def switch_match(self, e):
         self.g.switch(e)
         if e.matched:
             # se a aresta entrou no emparelhamento, devemos ajeitar os
@@ -233,43 +210,43 @@ class EdmondsBlossom():
             for _ in range(2):
                 v = self.dsu.find(f.to)
                 if isinstance(v, Blossom):
-                    self.__expansion_push([v, f.to])
+                    self.expansion_push([v, f.to])
                 f = e.twin
 
-    def __expansion_push(self, item):
+    def expansion_push(self, item):
         if item[0] in self.expansion_set:
             return
         self.expansion_list.append(item)
         self.expansion_set.add(item[0])
 
-    def __expansion_clear(self):
+    def expansion_clear(self):
         self.expansion_set = set()
 
-    def __alternate(self, v):
+    def alternate(self, v):
         if v.parent is None:
             return
-        self.__switch_match(v.parent)
-        self.__alternate(self.dsu.find(v.parent.to))
+        self.switch_match(v.parent)
+        self.alternate(self.dsu.find(v.parent.to))
 
-    def __go_up(self, u, edges, path):
+    def go_up(self, u, edges, path):
         if path is not None:
             path.append(u)
         if edges is not None:
             edges.append(u.parent)
         return self.dsu.find(u.parent.to)
 
-    def __find_cycle(self, u, v, u_to_v):
+    def find_cycle(self, u, v, u_to_v):
         path_u = []
         path_v = []
         edges_u = []
         edges_v = []
         while u.depth > v.depth:
-            u = self.__go_up(u, edges_u, path_u)
+            u = self.go_up(u, edges_u, path_u)
         while v.depth > u.depth:
-            v = self.__go_up(v, edges_v, path_v)
+            v = self.go_up(v, edges_v, path_v)
         while u != v:
-            u = self.__go_up(u, edges_u, path_u)
-            v = self.__go_up(v, edges_v, path_v)
+            u = self.go_up(u, edges_u, path_u)
+            v = self.go_up(v, edges_v, path_v)
         cycle = [u] + path_u[::-1] + path_v
         edge_cycle = [e.twin for e in edges_u][::-1] + [u_to_v] + edges_v
         return cycle, edge_cycle
