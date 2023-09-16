@@ -20,5 +20,11 @@ class Vertex:
         e = filter(lambda edge: edge.matched, self.adjacency)
         return list(e)[0]
 
+    def reset(self):
+        self.color = -1
+        self.parent = None
+        self.root = self
+        self.depth = 0
+
     def print(self):
         print(self.id)

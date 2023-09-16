@@ -16,6 +16,7 @@ class EdmondsBlossom():
         self.step = "begin"
         self.blossom = None
         self.augmenting = None
+        self.barrier = None
 
     def run(self):
         self.run_algorithm()
@@ -34,7 +35,7 @@ class EdmondsBlossom():
 
     def verify(self):
         deficiency = 0
-        barrier = set()
+        self.barrier = set()
         for v in self.g.vertices:
             count_match = [e.matched for e in v.adjacency].count(True)
             if count_match > 1:
@@ -45,28 +46,30 @@ class EdmondsBlossom():
                 return False
             deficiency += count_match == 0
             if v.color == 1 and not isinstance(self.dsu.find(v), Blossom):
-                barrier.add(v)
+                self.barrier.add(v)
 
         odd = 0
         for v in self.g.vertices:
-            if v.color != 3 and v not in barrier:
+            if v.color != 3 and v not in self.barrier:
                 # color 3 indicates that the vertex was already counted
-                odd += self.count_size(v, barrier) & 1
+                odd += self.count_size(v) & 1
 
-        if deficiency != odd - len(barrier):
+        if deficiency != odd - len(self.barrier):
             return False
 
-        self.g.color_vertices(barrier, BARRIER_COLOR)
+        self.g.color_vertices(self.barrier, BARRIER_COLOR)
 
         return True
 
-    def count_size(self, v, barrier):
+    def count_size(self, v):
+        # counts the size of the component that containt `v` in the graph
+        # G - barrier
         v.color = 3
         size = 1
         for e in v.adjacency:
             u = e.to
-            if u.color != 3 and u not in barrier:
-                size += self.count_size(u, barrier)
+            if u.color != 3 and u not in self.barrier:
+                size += self.count_size(u)
         return size
 
     def update_state(self, widget, event):
@@ -93,6 +96,9 @@ class EdmondsBlossom():
                         self.step = "last expand"
                     else:
                         self.step = "end"
+                    if len(self.barrier) > 0:
+                        self.g.update_animation_state()
+                        return True
         elif self.step == "shrink":
             self.g.color_alternating(
                 self.path_to_root(self.blossom.tip()),
@@ -102,7 +108,6 @@ class EdmondsBlossom():
             self.step = "search"
         elif self.step == "augment":
             self.augment()
-            self.fill_expansion()
             if len(self.expansion_list) > 0:
                 self.step = "expand"
             else:
@@ -125,16 +130,20 @@ class EdmondsBlossom():
 
     def build_queue(self):
         self.q = deque()
+        added = set()
 
         for v in self.g.vertices:
-            v.color = -1
-            v.parent = None
-            v.root = v
-            v.depth = 0
-            if not v.matched():
+            x = self.dsu.find(v)
+            vertex = x if isinstance(x, Blossom) else v
+
+            if vertex in added:
+                continue
+
+            vertex.reset()
+            if not vertex.matched():
                 # adiciono os vértices não emparelhados na fila
-                v.color = 0
-                self.q.append(v)
+                vertex.color = 0
+                self.q.append(vertex)
 
     def iterate(self):
         while len(self.q) > 0:
