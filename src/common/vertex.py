@@ -8,6 +8,7 @@ class Vertex:
         self.parent = None
         self.root = self
         self.depth = 0
+        self.visited = False
 
     def add_neighbor(self, edge):
         self.adjacency.append(edge)

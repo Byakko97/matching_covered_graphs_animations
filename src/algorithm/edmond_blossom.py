@@ -50,8 +50,7 @@ class EdmondsBlossom():
 
         odd = 0
         for v in self.g.vertices:
-            if v.color != 3 and v not in self.barrier:
-                # color 3 indicates that the vertex was already counted
+            if not v.visited and v not in self.barrier:
                 odd += self.count_size(v) & 1
 
         if deficiency != odd - len(self.barrier):
@@ -64,11 +63,11 @@ class EdmondsBlossom():
     def count_size(self, v):
         # counts the size of the component that containt `v` in the graph
         # G - barrier
-        v.color = 3
+        v.visited = True
         size = 1
         for e in v.adjacency:
             u = e.to
-            if u.color != 3 and u not in self.barrier:
+            if not u.visited and u not in self.barrier:
                 size += self.count_size(u)
         return size
 
