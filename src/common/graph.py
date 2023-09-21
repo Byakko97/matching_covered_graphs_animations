@@ -16,6 +16,7 @@ class Graph:
 
         self.animation = None if not animate else GraphAnimation(self.size)
 
+        self.edges = []
         for _ in range(m):
             u, v = [int(x) for x in input().split()]
             self.add_edge(u, v)
@@ -34,6 +35,9 @@ class Graph:
 
         if self.animation is not None:
             self.animation.add_edge(u, v)
+
+        self.edges.append(to_u)
+        return to_u
 
     def switch(self, e):
         e.switch()
