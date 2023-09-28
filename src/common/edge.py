@@ -7,6 +7,9 @@ class Edge:
         self.twin = None
         self.matched = False
 
+    def endpoints(self):
+        return [self.to, self.twin.to]
+
     def switch(self):
         """muda o estado da aresta de emparelhado a não empralehado
            e viceversa"""

@@ -17,25 +17,45 @@ class CarvalhoCheriyan():
             print("The graph is not matching covered since ", end="")
             if not self.connected:
                 print("is not connected.")
-            elif not self.is_matchable():
+            elif not self.is_matchable(self.g, self.g.size):
                 print("is not matchable.")
             else:
                 print("the following edges are not matchable:")
                 for edge in self.not_matchable_edges:
                     print(edge.to.id, edge.twin.to.id)
 
-    def run_algorithm(self):
-        if not self.is_connected():
-            return False
+    def test(self):
+        self.run_algorithm()
+        return self.verify()
 
+    def verify(self):
+        not_matchable_edges = []
+        for edge in self.g.edges:
+            u, v = edge.endpoints()
+            aux_graph = Graph(self.g.size)
+            for other_edge in self.g.edges:
+                if (other_edge == edge
+                        or u in other_edge.endpoints()
+                        or v in other_edge.endpoints()):
+                    continue
+                aux_graph.add_edge(other_edge.to.id, other_edge.twin.to.id)
+
+            EdmondsBlossom(aux_graph).run_algorithm()
+            if not self.is_matchable(aux_graph, self.g.size - 2):
+                not_matchable_edges.append(edge)
+
+        return set(not_matchable_edges) == set(self.not_matchable_edges)
+
+    def run_algorithm(self):
         EdmondsBlossom(self.g).run_algorithm()
-        if not self.is_matchable():
+        if not self.is_matchable(self.g, self.g.size):
+            self.not_matchable_edges = self.g.edges
             return False
 
         for v in self.g.vertices:
             self.iterate(v)
 
-        return len(self.not_matchable_edges) == 0
+        return self.is_connected() and len(self.not_matchable_edges) == 0
 
     def is_connected(self):
         self.visit(self.g[0])
@@ -49,17 +69,17 @@ class CarvalhoCheriyan():
             if not u.visited:
                 self.visit(u)
 
-    def is_matchable(self):
+    def is_matchable(self, graph, size):
         return (
-            self.g.size % 2 == 0 and
-            self.g.size // 2 ==
-            sum(edge.matched for edge in self.g.edges)
+            size % 2 == 0 and
+            size // 2 ==
+            sum(edge.matched for edge in graph.edges)
         )
 
     def is_matching_covered(self):
         return (
             self.connected
-            and self.is_matchable()
+            and self.is_matchable(self.g, self.g.size)
             and len(self.not_matchable_edges) == 0
         )
 

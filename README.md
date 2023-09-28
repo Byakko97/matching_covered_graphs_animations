@@ -53,3 +53,4 @@ python3 test.py algo
 The currently supported algorithms are:
 
 * `edmonds`: Edmonds's Blossom algorithm
+* `carvalho_cheriyan`: Carvalho-Cheriyan algorithm to decide if a graph is matching covered
