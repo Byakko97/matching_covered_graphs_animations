@@ -26,8 +26,8 @@ class GraphAnimation:
         self.pos = None
         self.win = None
 
-        self.matched_color = self.g.new_edge_property("string")
-        self.matched_width = self.g.new_edge_property("float")
+        self.edge_color = self.g.new_edge_property("string")
+        self.edge_width = self.g.new_edge_property("float")
         self.draw_order = self.g.new_edge_property("int")
 
         self.vertex_color = self.g.new_vertex_property("string")
@@ -36,19 +36,24 @@ class GraphAnimation:
 
     def add_edge(self, u, v):
         e = self.g.add_edge(self.g.vertex(u), self.g.vertex(v))
-        self.matched_color[e] = UNMATCHED_COLOR
-        self.matched_width[e] = EDGE_WIDTH
+        self.edge_color[e] = UNMATCHED_COLOR
+        self.edge_width[e] = EDGE_WIDTH
         self.draw_order[e] = 0
 
-    def switch(self, e):
+    def match_color(self, e):
         anim_edge = self.g.edge(e.to.id, e.twin.to.id)
-        self.matched_color[anim_edge] = (
+        self.edge_color[anim_edge] = (
             MATCHED_COLOR if e.matched else UNMATCHED_COLOR
         )
-        self.matched_width[anim_edge] = (
+        self.edge_width[anim_edge] = (
             HIGHLIGHT_WIDTH if e.matched else EDGE_WIDTH
         )
         self.draw_order[anim_edge] = 1 if e.matched else 0
+
+    def color_edges(self, edges, color):
+        for e in edges:
+            anim_edge = self.g.edge(e.to.id, e.twin.to.id)
+            self.edge_color[anim_edge] = color
 
     def color_vertices(self, vertices, color):
         for v in vertices:
@@ -58,10 +63,10 @@ class GraphAnimation:
         for e in path:
             if not e.matched:
                 anim_edge = self.g.edge(e.to.id, e.twin.to.id)
-                self.matched_color[anim_edge] = (
+                self.edge_color[anim_edge] = (
                     HIGHLIGHT_COLOR if not undo else UNMATCHED_COLOR
                 )
-                self.matched_width[anim_edge] = (
+                self.edge_width[anim_edge] = (
                     HIGHLIGHT_WIDTH if not undo else EDGE_WIDTH
                 )
                 self.draw_order[anim_edge] = 1 if not undo else 0
@@ -96,10 +101,10 @@ class GraphAnimation:
                     self.g, self.pos, geometry=(750, 600),
                     eorder=self.draw_order,
                     vertex_fill_color=self.vertex_color,
-                    edge_color=self.matched_color,
-                    edge_pen_width=self.matched_width,
+                    edge_color=self.edge_color,
+                    edge_pen_width=self.edge_width,
                     vertex_size=20,
-                    )
+        )
 
         self.win.connect("delete_event", Gtk.main_quit)
         self.win.graph.disconnect_by_func(self.win.graph.button_press_event)

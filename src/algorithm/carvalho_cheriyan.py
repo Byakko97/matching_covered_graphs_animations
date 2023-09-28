@@ -1,5 +1,10 @@
 from src.algorithm.edmond_blossom import EdmondsBlossom
 from src.common.graph import Graph
+from src.common.constants import (
+    VERTEX_COLOR,
+    DELETED_COLOR,
+    NOT_MATCHABLE_COLOR,
+)
 
 
 class CarvalhoCheriyan():
@@ -8,6 +13,9 @@ class CarvalhoCheriyan():
         self.connected = None
         self.not_matchable_edges = []
         self.max_matching = None
+
+        self.step = "begin"
+        self.iteration_pos = 0
 
     def run(self):
         self.run_algorithm()
@@ -23,6 +31,9 @@ class CarvalhoCheriyan():
                 print("the following edges are not matchable:")
                 for edge in self.not_matchable_edges:
                     print(edge.to.id, edge.twin.to.id)
+
+    def animate(self, manual_mode, speed):
+        self.g.animation.animate(self.update_state, manual_mode, speed)
 
     def test(self):
         self.run_algorithm()
@@ -47,19 +58,51 @@ class CarvalhoCheriyan():
         return set(not_matchable_edges) == set(self.not_matchable_edges)
 
     def run_algorithm(self):
-        EdmondsBlossom(self.g).run_algorithm()
-        if not self.is_matchable(self.g, self.g.size):
-            self.not_matchable_edges = self.g.edges
+        while self.update_state(None, None):
+            pass
+
+    def update_state(self, widget, event):
+        if self.step == "end":
             return False
 
-        for v in self.g.vertices:
-            self.iterate(v)
+        if self.step == "begin":
+            if not self.is_connected():
+                self.step = "end"
+            else:
+                edmonds = EdmondsBlossom(self.g)
+                edmonds.run_algorithm()
+                self.g.color_vertices(edmonds.barrier, VERTEX_COLOR)
+                if not self.is_matchable(self.g, self.g.size):
+                    self.not_matchable_edges = self.g.edges
+                    self.step = "end"
+                else:
+                    self.step = "delete_vertex"
 
-        return self.is_connected() and len(self.not_matchable_edges) == 0
+        if self.step == "delete_vertex":
+            self.delete_vertex(self.g[self.iteration_pos])
+            self.step = "iterate"
+        elif self.step == "iterate":
+            self.iterate(self.g[self.iteration_pos])
+            self.step = "undelete_vertex"
+        elif self.step == "undelete_vertex":
+            self.undelete_vertex(self.g[self.iteration_pos])
+            self.iteration_pos += 1
+            if self.iteration_pos == self.g.size:
+                self.step = "final"
+            else:
+                self.step = "delete_vertex"
+        elif self.step == "final":
+            self.g.color_edges(self.not_matchable_edges, NOT_MATCHABLE_COLOR)
+            self.step = "end"
+
+        self.g.update_animation_state()
+        return True
 
     def is_connected(self):
         self.visit(self.g[0])
         self.connected = not any(not v.visited for v in self.g.vertices)
+        for v in self.g.vertices:
+            v.visited = False
         return self.connected
 
     def visit(self, v):
@@ -83,19 +126,37 @@ class CarvalhoCheriyan():
             and len(self.not_matchable_edges) == 0
         )
 
-    def iterate(self, v):
-        aux_graph = Graph(self.g.size)
+    def delete_vertex(self, v):
+        self.g.color_vertices([v], DELETED_COLOR)
+        deleted_edges = []
+
+        self.current_aux_graph = Graph(self.g.size)
         for edge in self.g.edges:
             if edge.to == v or edge.twin.to == v:
+                deleted_edges.append(edge)
                 continue
-            aux_edge = aux_graph.add_edge(edge.to.id, edge.twin.to.id)
+            aux_edge = self.current_aux_graph.add_edge(
+                edge.to.id, edge.twin.to.id
+            )
             if edge.matched:
-                aux_graph.switch(aux_edge)
+                self.current_aux_graph.switch(aux_edge)
 
-        EdmondsBlossom(aux_graph).run_algorithm()
+        self.g.color_edges(deleted_edges, DELETED_COLOR)
+
+    def iterate(self, v):
+        EdmondsBlossom(self.current_aux_graph).run_algorithm()
+        new_not_matchables = []
         for e in v.adjacency:
             u = e.to
             if u.id < v.id:
                 continue
-            if aux_graph[u.id].color != 0:
+            if self.current_aux_graph[u.id].color != 0:
+                new_not_matchables.append(e)
                 self.not_matchable_edges.append(e)
+
+        self.g.color_edges(new_not_matchables, NOT_MATCHABLE_COLOR)
+
+    def undelete_vertex(self, v):
+        self.g.color_vertices([v], VERTEX_COLOR)
+        for e in v.adjacency:
+            self.g.match_color(e)

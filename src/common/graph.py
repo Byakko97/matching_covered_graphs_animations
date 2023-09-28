@@ -41,9 +41,11 @@ class Graph:
 
     def switch(self, e):
         e.switch()
+        self.match_color(e)
 
+    def match_color(self, e):
         if self.animation is not None:
-            self.animation.switch(e)
+            self.animation.match_color(e)
 
     def print_matching(self):
         for v in self.vertices:
@@ -54,6 +56,10 @@ class Graph:
     def color_vertices(self, vertices, color):
         if self.animation is not None:
             self.animation.color_vertices(vertices, color)
+
+    def color_edges(self, edges, color):
+        if self.animation is not None:
+            self.animation.color_edges(edges, color)
 
     def color_alternating(self, path, undo=False):
         if self.animation is not None:
