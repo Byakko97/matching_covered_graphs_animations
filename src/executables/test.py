@@ -3,24 +3,18 @@ import sys
 
 from os import listdir
 
-from src.algorithm.edmond_blossom import EdmondsBlossom
-from src.algorithm.carvalho_cheriyan import CarvalhoCheriyan
 from src.common.graph import Graph
+from src.executables.utils import algorithm_map
 
 parser = argparse.ArgumentParser(
     description="Test algorithm with all test inputs in tests folder"
 )
 parser.add_argument(
     "algorithm",
-    choices=["edmonds", "carvalho_cheriyan"],
+    choices=algorithm_map.keys(),
     help="Algorithm to be tested",
 )
 args = parser.parse_args()
-
-algo_map = {
-    "edmonds": EdmondsBlossom,
-    "carvalho_cheriyan": CarvalhoCheriyan,
-}
 
 for test_id in listdir("tests/"):
     sys.stdin = open("tests/" + test_id, "r")
@@ -28,7 +22,7 @@ for test_id in listdir("tests/"):
 
     print(test_id, ": ", end='')
 
-    algo = algo_map[args.algorithm](g)
+    algo = algorithm_map[args.algorithm](g)
     if algo.test():
         print("OK")
     else:
