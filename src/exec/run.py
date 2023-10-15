@@ -2,7 +2,7 @@ import argparse
 import sys
 
 from src.common.graph import Graph
-from src.executables.utils import algorithm_map
+from src.exec.utils import algorithm_map
 
 parser = argparse.ArgumentParser(description="Run algorithm with input")
 parser.add_argument(

@@ -4,7 +4,7 @@ import sys
 from os import listdir
 
 from src.common.graph import Graph
-from src.executables.utils import algorithm_map
+from src.exec.utils import algorithm_map
 
 parser = argparse.ArgumentParser(
     description="Test algorithm with all test inputs in tests folder"
