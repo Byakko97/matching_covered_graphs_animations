@@ -132,8 +132,7 @@ class EdmondsBlossom():
         added = set()
 
         for v in self.g.vertices:
-            x = self.dsu.find(v)
-            vertex = x if isinstance(x, Blossom) else v
+            vertex = self.dsu.find(v)
 
             if vertex in added:
                 continue
@@ -143,6 +142,7 @@ class EdmondsBlossom():
                 # adiciono os vértices não emparelhados na fila
                 vertex.color = 0
                 self.q.append(vertex)
+                added.add(vertex)
 
     def iterate(self):
         while len(self.q) > 0:
@@ -252,13 +252,11 @@ class EdmondsBlossom():
         path_v = []
         edges_u = []
         edges_v = []
-        while u.depth > v.depth:
-            u = self.go_up(u, edges_u, path_u)
-        while v.depth > u.depth:
-            v = self.go_up(v, edges_v, path_v)
         while u != v:
-            u = self.go_up(u, edges_u, path_u)
-            v = self.go_up(v, edges_v, path_v)
+            if u.depth > v.depth:
+                u = self.go_up(u, edges_u, path_u)
+            else:
+                v = self.go_up(v, edges_v, path_v)
         cycle = [u] + path_u[::-1] + path_v
         edge_cycle = [e.twin for e in edges_u][::-1] + [u_to_v] + edges_v
         return cycle, edge_cycle
