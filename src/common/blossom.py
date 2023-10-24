@@ -14,16 +14,19 @@ class Blossom(Vertex):
         self.parent = self.tip().parent
         self.color = 0
         self.depth = self.tip().depth
+
         # constrói a adjacência
         for w in cycle:
             for e in w.adjacency:
                 u = dsu.find(e.to)
                 if u not in cycle:
                     self.add_neighbor(e)
+
         # contrai a floração
         dsu.add(self)
         for w in cycle:
             dsu.union(self, w)
+            w.color = 0
 
         if animation is not None:
             self.old_pos = None
