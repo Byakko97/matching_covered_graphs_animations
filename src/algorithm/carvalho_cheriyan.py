@@ -40,7 +40,10 @@ class CarvalhoCheriyan():
         return self.verify()
 
     def verify(self):
-        not_matchable_edges = []
+        if not self.connected:
+            return True
+
+        expected_edges = []
         for edge in self.g.edges:
             u, v = edge.endpoints()
             aux_graph = Graph(self.g.size)
@@ -53,9 +56,16 @@ class CarvalhoCheriyan():
 
             EdmondsBlossom(aux_graph).run_algorithm()
             if not self.is_matchable(aux_graph, self.g.size - 2):
-                not_matchable_edges.append(edge)
+                if edge.to.id < edge.twin.to.id:
+                    edge = edge.twin
+                expected_edges.append(edge)
 
-        return set(not_matchable_edges) == set(self.not_matchable_edges)
+        actual_edges = []
+        for edge in self.not_matchable_edges:
+            if edge.to.id < edge.twin.to.id:
+                edge = edge.twin
+            actual_edges.append(edge)
+        return set(expected_edges) == set(actual_edges)
 
     def run_algorithm(self):
         while self.update_state(None, None):
