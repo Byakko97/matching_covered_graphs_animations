@@ -68,3 +68,7 @@ class Graph:
     def update_animation_state(self):
         if self.animation is not None:
             self.animation.update_state()
+
+    def show_labels(self):
+        if self.animation is not None:
+            self.animation.show_labels(self.vertices)

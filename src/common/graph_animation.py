@@ -30,9 +30,13 @@ class GraphAnimation:
         self.edge_width = self.g.new_edge_property("float")
         self.draw_order = self.g.new_edge_property("int")
 
+        self.vertex_text = self.g.new_vertex_property("string")
+        self.vertex_text_color = self.g.new_vertex_property("string")
         self.vertex_color = self.g.new_vertex_property("string")
         for v in self.g.vertices():
             self.vertex_color[v] = VERTEX_COLOR
+            self.vertex_text[v] = ""
+            self.vertex_text_color[v] = "white"
 
     def add_edge(self, u, v):
         e = self.g.add_edge(self.g.vertex(u), self.g.vertex(v))
@@ -58,6 +62,11 @@ class GraphAnimation:
     def color_vertices(self, vertices, color):
         for v in vertices:
             self.vertex_color[self.g.vertex(v.id)] = color
+
+    def show_labels(self, vertices):
+        for v in vertices:
+            id = self.g.vertex(v.id)
+            self.vertex_text[id] = str(v.color) if v.color != -1 else ""
 
     def color_alternating(self, path, undo=False):
         for e in path:
@@ -101,6 +110,8 @@ class GraphAnimation:
                     self.g, self.pos, geometry=(750, 600),
                     eorder=self.draw_order,
                     vertex_fill_color=self.vertex_color,
+                    vertex_text=self.vertex_text,
+                    vertex_text_color=self.vertex_text_color,
                     edge_color=self.edge_color,
                     edge_pen_width=self.edge_width,
                     vertex_size=20,

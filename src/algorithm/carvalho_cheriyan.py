@@ -83,18 +83,28 @@ class CarvalhoCheriyan():
                 edmonds.run_algorithm()
                 self.g.color_vertices(edmonds.barrier, VERTEX_COLOR)
                 if not self.is_matchable(self.g, self.g.size):
+                    unmatched_vertices = [
+                        v for v in self.g.vertices if not v.matched()
+                    ]
+                    self.g.color_vertices(
+                        unmatched_vertices,
+                        NOT_MATCHABLE_COLOR,
+                    )
+
                     self.not_matchable_edges = self.g.edges
                     self.step = "end"
                 else:
                     self.step = "delete_vertex"
-
-        if self.step == "delete_vertex":
+        elif self.step == "delete_vertex":
             self.delete_vertex(self.g[self.iteration_pos])
             self.step = "iterate"
         elif self.step == "iterate":
             self.iterate(self.g[self.iteration_pos])
             self.step = "undelete_vertex"
         elif self.step == "undelete_vertex":
+            for v in self.g.vertices:
+                v.reset()
+            self.g.show_labels()
             self.undelete_vertex(self.g[self.iteration_pos])
             self.iteration_pos += 1
             if self.iteration_pos == self.g.size:
@@ -164,6 +174,10 @@ class CarvalhoCheriyan():
                 new_not_matchables.append(e)
                 self.not_matchable_edges.append(e)
 
+        for u in self.g.vertices:
+            if u != v:
+                u.color = self.current_aux_graph[u.id].color
+        self.g.show_labels()
         self.g.color_edges(new_not_matchables, NOT_MATCHABLE_COLOR)
 
     def undelete_vertex(self, v):
