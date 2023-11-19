@@ -1,6 +1,6 @@
 from src.algorithm.edmonds_blossom import EdmondsBlossom
 from src.common.graph import Graph
-from src.common.constants import (
+from src.animation.constants import (
     VERTEX_COLOR,
     DELETED_COLOR,
     NOT_MATCHABLE_COLOR,

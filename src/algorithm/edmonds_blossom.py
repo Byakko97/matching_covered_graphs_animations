@@ -3,7 +3,7 @@ from collections import deque
 
 from src.common.blossom import Blossom
 from src.common.union_find import UnionFind
-from src.common.constants import BARRIER_COLOR
+from src.animation.constants import BARRIER_COLOR
 
 
 class EdmondsBlossom():
