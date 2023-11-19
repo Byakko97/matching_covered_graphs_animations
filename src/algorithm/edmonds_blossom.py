@@ -1,15 +1,16 @@
 
 from collections import deque
 
+from src.algorithm.algorithm_base import AlgorithmBase
+from src.animation.constants import BARRIER_COLOR
 from src.data_structures.blossom import Blossom
 from src.data_structures.union_find import UnionFind
-from src.animation.constants import BARRIER_COLOR
 
 
-class EdmondsBlossom():
+class EdmondsBlossom(AlgorithmBase):
 
     def __init__(self, g):
-        self.g = g
+        super().__init__(g)
         self.expansion_list = []
         self.expansion_set = set()
         self.dsu = UnionFind(g.vertices)
@@ -19,19 +20,12 @@ class EdmondsBlossom():
         self.barrier = None
 
     def run(self):
-        self.run_algorithm()
+        super().run()
         self.g.print_matching()
 
-    def animate(self, manual_mode, speed):
-        self.g.animation.animate(self.update_state, manual_mode, speed)
-
     def test(self):
-        self.run_algorithm()
+        super().test()
         return self.step != "fail"
-
-    def run_algorithm(self):
-        while self.update_state(None, None):
-            pass
 
     def verify(self):
         deficiency = 0

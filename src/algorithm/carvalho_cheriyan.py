@@ -1,3 +1,4 @@
+from src.algorithm.algorithm_base import AlgorithmBase
 from src.algorithm.edmonds_blossom import EdmondsBlossom
 from src.data_structures.graph import Graph
 from src.animation.constants import (
@@ -7,9 +8,9 @@ from src.animation.constants import (
 )
 
 
-class CarvalhoCheriyan():
+class CarvalhoCheriyan(AlgorithmBase):
     def __init__(self, g):
-        self.g = g
+        super().__init__(g)
         self.connected = None
         self.not_matchable_edges = []
         self.max_matching = None
@@ -18,7 +19,7 @@ class CarvalhoCheriyan():
         self.iteration_pos = 0
 
     def run(self):
-        self.run_algorithm()
+        super().run()
         if self.is_matching_covered():
             print("The graph is matching covered.")
         else:
@@ -32,11 +33,8 @@ class CarvalhoCheriyan():
                 for edge in self.not_matchable_edges:
                     print(edge.to.id, edge.twin.to.id)
 
-    def animate(self, manual_mode, speed):
-        self.g.animation.animate(self.update_state, manual_mode, speed)
-
     def test(self):
-        self.run_algorithm()
+        super().test()
         return self.verify()
 
     def verify(self):
