@@ -1,5 +1,5 @@
 class UnionFind:
-    """Implementaãço lenta da estrutura de dados Union-Find"""
+    """Implementação lenta da estrutura de dados Union-Find"""
 
     def __init__(self, list):
         self.parent = {}
