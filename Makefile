@@ -1,8 +1,8 @@
 run:
-	python3 src/exec/run.py $(algo) $(test)
+	python3 src/api/run.py $(algo) $(test)
 
 test:
-	python3 src/exec/test.py $(algo)
+	python3 src/api/test.py $(algo)
 
 animate:
-	python3 src/exec/animate.py $(algo) $(test) $(if $(f), -f $(f), ) $(if $(m), -m)
+	python3 src/api/animate.py $(algo) $(test) $(if $(f), -f $(f), ) $(if $(m), -m)
