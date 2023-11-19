@@ -1,4 +1,4 @@
-from src.algorithm.edmond_blossom import EdmondsBlossom
+from src.algorithm.edmonds_blossom import EdmondsBlossom
 from src.common.graph import Graph
 from src.common.constants import (
     VERTEX_COLOR,
