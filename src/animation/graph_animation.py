@@ -4,7 +4,7 @@ import copy
 from gi.repository import Gtk, GLib
 
 from src.common.blossom import Blossom
-from src.common.constants import (
+from src.animation.constants import (
     VERTEX_COLOR,
     BLOSSOM_COLOR,
     UNMATCHED_COLOR,

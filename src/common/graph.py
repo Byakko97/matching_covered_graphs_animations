@@ -1,6 +1,6 @@
 from src.common.vertex import Vertex
 from src.common.edge import Edge
-from src.common.graph_animation import GraphAnimation
+from src.animation.graph_animation import GraphAnimation
 
 
 class Graph:
