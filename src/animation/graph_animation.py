@@ -1,9 +1,11 @@
-import graph_tool.all as gt
+
+from __future__ import annotations
+from typing import List, TYPE_CHECKING
 import copy
 
+import graph_tool.all as gt
 from gi.repository import Gtk, GLib
 
-from src.data_structures.blossom import Blossom
 from src.animation.constants import (
     VERTEX_COLOR,
     BLOSSOM_COLOR,
@@ -13,12 +15,17 @@ from src.animation.constants import (
     HIGHLIGHT_WIDTH,
     HIGHLIGHT_COLOR,
 )
+if TYPE_CHECKING:
+    from src.data_structures.blossom import Blossom
+    from src.data_structures.edge import Edge
+    from src.data_structures.vertex import Vertex
+    from src.data_structures.union_find import UnionFind
 
 
 class GraphAnimation:
     """Animação de um grafo"""
 
-    def __init__(self, n=0):
+    def __init__(self, n: int = 0):
         self.g = gt.Graph(directed=False)
         if n > 0:
             self.g.add_vertex(n)
@@ -38,13 +45,13 @@ class GraphAnimation:
             self.vertex_text[v] = ""
             self.vertex_text_color[v] = "white"
 
-    def add_edge(self, u, v):
+    def add_edge(self, u: int, v: int) -> None:
         e = self.g.add_edge(self.g.vertex(u), self.g.vertex(v))
         self.edge_color[e] = UNMATCHED_COLOR
         self.edge_width[e] = EDGE_WIDTH
         self.draw_order[e] = 0
 
-    def match_color(self, e):
+    def match_color(self, e: Edge) -> None:
         anim_edge = self.g.edge(e.to.id, e.twin.to.id)
         self.edge_color[anim_edge] = (
             MATCHED_COLOR if e.matched else UNMATCHED_COLOR
@@ -54,21 +61,21 @@ class GraphAnimation:
         )
         self.draw_order[anim_edge] = 1 if e.matched else 0
 
-    def color_edges(self, edges, color):
+    def color_edges(self, edges: List[Edge], color: str) -> None:
         for e in edges:
             anim_edge = self.g.edge(e.to.id, e.twin.to.id)
             self.edge_color[anim_edge] = color
 
-    def color_vertices(self, vertices, color):
+    def color_vertices(self, vertices: List[Vertex], color: str) -> None:
         for v in vertices:
             self.vertex_color[self.g.vertex(v.id)] = color
 
-    def show_labels(self, vertices):
+    def show_labels(self, vertices: List[Vertex]) -> None:
         for v in vertices:
             id = self.g.vertex(v.id)
             self.vertex_text[id] = str(v.color) if v.color != -1 else ""
 
-    def color_alternating(self, path, undo=False):
+    def color_alternating(self, path: List[Edge], undo: bool = False) -> None:
         for e in path:
             if not e.matched:
                 anim_edge = self.g.edge(e.to.id, e.twin.to.id)
@@ -80,7 +87,7 @@ class GraphAnimation:
                 )
                 self.draw_order[anim_edge] = 1 if not undo else 0
 
-    def shrink(self, blossom, edges):
+    def shrink(self, blossom: Blossom, edges: List[Edge]) -> None:
         self.color_vertices(blossom, BLOSSOM_COLOR)
         self.color_alternating(edges, undo=True)
 
@@ -96,7 +103,7 @@ class GraphAnimation:
 
         return old_pos
 
-    def expand(self, blossom, old_pos, dsu):
+    def expand(self, blossom: Blossom, old_pos, dsu: UnionFind) -> None:
         for i in range(len(blossom)):
             self.pos[self.g.vertex(blossom[i].id)] = old_pos[i]
             self.vertex_color[self.g.vertex(blossom[i].id)] = (
@@ -104,7 +111,7 @@ class GraphAnimation:
                 else VERTEX_COLOR
             )
 
-    def animate(self, callback, manual_mode, speed):
+    def animate(self, callback, manual_mode: bool, frequence: int) -> None:
         self.pos = gt.sfdp_layout(self.g)
         self.win = gt.GraphWindow(
                     self.g, self.pos, geometry=(750, 600),
@@ -122,11 +129,11 @@ class GraphAnimation:
         if manual_mode:
             self.win.connect("button_press_event", callback)
         else:
-            GLib.timeout_add(speed, callback, None, None)
+            GLib.timeout_add(frequence, callback, None, None)
 
         self.win.show_all()
         Gtk.main()
 
-    def update_state(self):
+    def update_state(self) -> None:
         self.win.graph.regenerate_surface()
         self.win.graph.queue_draw()

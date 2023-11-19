@@ -1,35 +1,38 @@
 
 from collections import deque
+from typing import Optional, List, Tuple, Deque
 
 from src.algorithm.algorithm_base import AlgorithmBase
 from src.animation.constants import BARRIER_COLOR
 from src.data_structures.blossom import Blossom
+from src.data_structures.edge import Edge
+from src.data_structures.graph import Graph
+from src.data_structures.vertex import Vertex
 from src.data_structures.union_find import UnionFind
 
 
 class EdmondsBlossom(AlgorithmBase):
 
-    def __init__(self, g):
+    def __init__(self, g: Graph):
         super().__init__(g)
-        self.expansion_list = []
-        self.expansion_set = set()
+        self.expansion_list: List[Tuple[Blossom, Vertex]] = []
+        self.expansion_set: set[Blossom] = set()
         self.dsu = UnionFind(g.vertices)
         self.step = "begin"
-        self.blossom = None
-        self.augmenting = None
-        self.barrier = None
+        self.blossom: Optional[Blossom] = None
+        self.augmenting: Tuple[Vertex, Vertex, Edge] = None
+        self.barrier: set[Vertex] = set()
 
-    def run(self):
+    def run(self) -> None:
         super().run()
         self.g.print_matching()
 
-    def test(self):
+    def test(self) -> None:
         super().test()
         return self.step != "fail"
 
-    def verify(self):
+    def verify(self) -> bool:
         deficiency = 0
-        self.barrier = set()
         for v in self.g.vertices:
             count_match = [e.matched for e in v.adjacency].count(True)
             if count_match > 1:
@@ -54,7 +57,7 @@ class EdmondsBlossom(AlgorithmBase):
 
         return True
 
-    def count_size(self, v):
+    def count_size(self, v: Vertex) -> int:
         # counts the size of the component that containt `v` in the graph
         # G - barrier
         v.visited = True
@@ -65,7 +68,7 @@ class EdmondsBlossom(AlgorithmBase):
                 size += self.count_size(u)
         return size
 
-    def update_state(self, widget, event):
+    def update_state(self, widget, event) -> bool:
         if self.step == "end":
             return False
 
@@ -121,9 +124,9 @@ class EdmondsBlossom(AlgorithmBase):
         self.g.update_animation_state()
         return True
 
-    def build_queue(self):
-        self.q = deque()
-        added = set()
+    def build_queue(self) -> None:
+        self.q: Deque[Vertex] = deque()
+        added: set[Vertex] = set()
 
         for v in self.g.vertices:
             vertex = self.dsu.find(v)
@@ -138,7 +141,7 @@ class EdmondsBlossom(AlgorithmBase):
                 self.q.append(vertex)
                 added.add(vertex)
 
-    def iterate(self):
+    def iterate(self) -> None:
         while len(self.q) > 0:
             v = self.q.popleft()
             x = self.dsu.find(v)
@@ -146,13 +149,12 @@ class EdmondsBlossom(AlgorithmBase):
                 # se o vértice foi contraido por outro,
                 # já não é válido no novo grafo
                 continue
-            v = x
             for e in v.adjacency:
                 u = self.dsu.find(e.to)
                 if u.color == 0:
                     if u.root != v.root:
                         # caminho aumentante achado
-                        self.augmenting = [u, v, e]
+                        self.augmenting = (u, v, e)
                         return "augment"
                     else:
                         # contrai a floração
@@ -170,44 +172,44 @@ class EdmondsBlossom(AlgorithmBase):
                     self.q.append(matched_e.to)
         return "stop"
 
-    def augment(self):
+    def augment(self) -> None:
         u, v, e = self.augmenting
         self.switch_match(e)
         self.alternate(u)
         self.alternate(v)
 
-    def augmenting_path(self):
+    def augmenting_path(self) -> list[Edge]:
         u, v, e = self.augmenting
         edges_u = self.path_to_root(u)
         edges_v = self.path_to_root(v)
         return edges_u[::-1] + [e] + edges_v
 
-    def path_to_root(self, v):
+    def path_to_root(self, v) -> list[Edge]:
         edges = []
         while v.parent is not None:
             v = self.go_up(v, edges, None)
         return edges
 
-    def fill_expansion(self):
+    def fill_expansion(self) -> None:
         # adiciona todas as florações na lista de expansão
         for v in self.g.vertices:
             x = self.dsu.find(v)
             if isinstance(x, Blossom):
-                self.expansion_push([x, None])
+                self.expansion_push(x, None)
 
-    def expand_one(self):
-        [blossom, expose] = self.expansion_list.pop()
+    def expand_one(self) -> None:
+        blossom, expose = self.expansion_list.pop()
         blossom.expand(
             self.g, self.dsu, self.g.animation, expose, self.expansion_push
         )
 
-    def add_child(self, v, u, e):
+    def add_child(self, v: Vertex, u: Vertex, e: Edge) -> None:
         u.root = v.root
         u.parent = e.twin
         u.color = 1 - v.color
         u.depth = v.depth + 1
 
-    def switch_match(self, e):
+    def switch_match(self, e: Edge) -> None:
         self.g.switch(e)
         if e.matched:
             # se a aresta entrou no emparelhamento, devemos ajeitar os
@@ -216,36 +218,40 @@ class EdmondsBlossom(AlgorithmBase):
             for _ in range(2):
                 v = self.dsu.find(f.to)
                 if isinstance(v, Blossom):
-                    self.expansion_push([v, f.to])
+                    self.expansion_push(v, f.to)
                 f = e.twin
 
-    def expansion_push(self, item):
-        if item[0] in self.expansion_set:
+    def expansion_push(self, b: Blossom, v: Optional[Vertex]) -> None:
+        if b in self.expansion_set:
             return
-        self.expansion_list.append(item)
-        self.expansion_set.add(item[0])
+        self.expansion_list.append((b, v))
+        self.expansion_set.add(b)
 
-    def expansion_clear(self):
+    def expansion_clear(self) -> None:
         self.expansion_set = set()
 
-    def alternate(self, v):
+    def alternate(self, v: Vertex) -> None:
         if v.parent is None:
             return
         self.switch_match(v.parent)
         self.alternate(self.dsu.find(v.parent.to))
 
-    def go_up(self, u, edges, path):
+    def go_up(
+        self, u: Vertex, edges: list[Edge], path: list[Vertex]
+    ) -> Vertex:
         if path is not None:
             path.append(u)
         if edges is not None:
             edges.append(u.parent)
         return self.dsu.find(u.parent.to)
 
-    def find_cycle(self, u, v, u_to_v):
-        path_u = []
-        path_v = []
-        edges_u = []
-        edges_v = []
+    def find_cycle(
+        self, u: Vertex, v: Vertex, u_to_v: Edge
+    ) -> Tuple[List[Vertex], List[Edge]]:
+        path_u: List[Vertex] = []
+        path_v: List[Vertex] = []
+        edges_u: List[Edge] = []
+        edges_v: List[Edge] = []
         while u != v:
             if u.depth > v.depth:
                 u = self.go_up(u, edges_u, path_u)
