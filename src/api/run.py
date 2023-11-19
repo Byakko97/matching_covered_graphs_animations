@@ -1,7 +1,7 @@
 import argparse
 import sys
 
-from src.common.graph import Graph
+from src.data_structures.graph import Graph
 from src.api.utils import algorithm_map
 
 parser = argparse.ArgumentParser(description="Run algorithm with input")

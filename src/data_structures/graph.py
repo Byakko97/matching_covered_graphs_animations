@@ -1,5 +1,5 @@
-from src.common.vertex import Vertex
-from src.common.edge import Edge
+from src.data_structures.vertex import Vertex
+from src.data_structures.edge import Edge
 from src.animation.graph_animation import GraphAnimation
 
 

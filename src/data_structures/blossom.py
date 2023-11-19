@@ -1,5 +1,5 @@
 
-from src.common.vertex import Vertex
+from src.data_structures.vertex import Vertex
 from src.animation.constants import FLOWER_COLOR
 
 

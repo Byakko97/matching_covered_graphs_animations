@@ -1,5 +1,5 @@
 from src.algorithm.edmonds_blossom import EdmondsBlossom
-from src.common.graph import Graph
+from src.data_structures.graph import Graph
 from src.animation.constants import (
     VERTEX_COLOR,
     DELETED_COLOR,

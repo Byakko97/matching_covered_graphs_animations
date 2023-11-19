@@ -3,7 +3,7 @@ import sys
 
 from os import listdir
 
-from src.common.graph import Graph
+from src.data_structures.graph import Graph
 from src.api.utils import algorithm_map
 
 parser = argparse.ArgumentParser(

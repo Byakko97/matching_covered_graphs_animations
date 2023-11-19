@@ -1,8 +1,8 @@
 
 from collections import deque
 
-from src.common.blossom import Blossom
-from src.common.union_find import UnionFind
+from src.data_structures.blossom import Blossom
+from src.data_structures.union_find import UnionFind
 from src.animation.constants import BARRIER_COLOR
 
 

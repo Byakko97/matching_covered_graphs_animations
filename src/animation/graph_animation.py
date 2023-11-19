@@ -3,7 +3,7 @@ import copy
 
 from gi.repository import Gtk, GLib
 
-from src.common.blossom import Blossom
+from src.data_structures.blossom import Blossom
 from src.animation.constants import (
     VERTEX_COLOR,
     BLOSSOM_COLOR,
