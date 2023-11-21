@@ -21,13 +21,15 @@ class CarvalhoCheriyan(AlgorithmBase):
         self.step = "begin"
         self.iteration_pos = 0
 
-    def run(self):
+    def run(self) -> None:
         super().run()
         if self.is_matching_covered():
             print("The graph is matching covered.")
         else:
             print("The graph is not matching covered since ", end="")
-            if not self.connected:
+            if self.g.size == 0:
+                print("doesn't have at least one edge")
+            elif not self.connected:
                 print("is not connected.")
             elif not self.is_matchable(self.g, self.g.size):
                 print("is not matchable.")
@@ -36,11 +38,11 @@ class CarvalhoCheriyan(AlgorithmBase):
                 for edge in self.not_matchable_edges:
                     print(edge.to.id, edge.twin.to.id)
 
-    def test(self):
+    def test(self) -> bool:
         super().test()
         return self.verify()
 
-    def verify(self):
+    def verify(self) -> bool:
         if not self.connected:
             return True
 
@@ -68,12 +70,12 @@ class CarvalhoCheriyan(AlgorithmBase):
             actual_edges.append(edge)
         return set(expected_edges) == set(actual_edges)
 
-    def update_state(self, widget, event):
+    def update_state(self, widget, event) -> bool:
         if self.step == "end":
             return False
 
         if self.step == "begin":
-            if not self.is_connected():
+            if self.g.size == 0 or not self.is_connected():
                 self.step = "end"
             else:
                 edmonds = EdmondsBlossom(self.g)
@@ -115,35 +117,35 @@ class CarvalhoCheriyan(AlgorithmBase):
         self.g.update_animation_state()
         return True
 
-    def is_connected(self):
+    def is_connected(self) -> bool:
         self.visit(self.g[0])
         self.connected = not any(not v.visited for v in self.g.vertices)
         for v in self.g.vertices:
             v.visited = False
         return self.connected
 
-    def visit(self, v: Vertex):
+    def visit(self, v: Vertex) -> None:
         v.visited = True
         for e in v.adjacency:
             u = e.to
             if not u.visited:
                 self.visit(u)
 
-    def is_matchable(self, graph: Graph, size: int):
+    def is_matchable(self, graph: Graph, size: int) -> bool:
         return (
             size % 2 == 0 and
             size // 2 ==
             sum(edge.matched for edge in graph.edges)
         )
 
-    def is_matching_covered(self):
+    def is_matching_covered(self) -> bool:
         return (
             self.connected
             and self.is_matchable(self.g, self.g.size)
             and len(self.not_matchable_edges) == 0
         )
 
-    def delete_vertex(self, v: Vertex):
+    def delete_vertex(self, v: Vertex) -> None:
         self.g.color_vertices([v], DELETED_COLOR)
         deleted_edges = []
 
@@ -160,7 +162,7 @@ class CarvalhoCheriyan(AlgorithmBase):
 
         self.g.color_edges(deleted_edges, DELETED_COLOR)
 
-    def iterate(self, v: Vertex):
+    def iterate(self, v: Vertex) -> None:
         EdmondsBlossom(self.current_aux_graph).run_algorithm()
         new_not_matchables: List[Edge] = []
         for e in v.adjacency:
@@ -177,7 +179,7 @@ class CarvalhoCheriyan(AlgorithmBase):
         self.g.show_labels()
         self.g.color_edges(new_not_matchables, NOT_MATCHABLE_COLOR)
 
-    def undelete_vertex(self, v: Vertex):
+    def undelete_vertex(self, v: Vertex) -> None:
         self.g.color_vertices([v], VERTEX_COLOR)
         for e in v.adjacency:
             self.g.match_color(e)
