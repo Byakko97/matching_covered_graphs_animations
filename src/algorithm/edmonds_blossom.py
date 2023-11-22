@@ -27,7 +27,7 @@ class EdmondsBlossom(AlgorithmBase):
         super().run()
         self.g.print_matching()
 
-    def test(self) -> None:
+    def test(self) -> bool:
         super().test()
         return self.step != "fail"
 

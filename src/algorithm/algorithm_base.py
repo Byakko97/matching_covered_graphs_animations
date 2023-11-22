@@ -19,5 +19,6 @@ class AlgorithmBase():
     def run(self) -> None:
         self.run_algorithm()
 
-    def test(self) -> None:
+    def test(self) -> bool:
         self.run_algorithm()
+        return True
