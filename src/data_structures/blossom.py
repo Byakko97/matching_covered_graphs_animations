@@ -1,11 +1,12 @@
-
-from typing import Callable, Optional
+from __future__ import annotations
+from typing import Callable, Optional, TYPE_CHECKING
 from src.animation.constants import FLOWER_COLOR
-from src.animation.graph_animation import GraphAnimation
 from src.data_structures.edge import Edge
-from src.data_structures.graph import Graph
 from src.data_structures.vertex import Vertex
 from src.data_structures.union_find import UnionFind
+if TYPE_CHECKING:
+    from src.animation.graph_animation import GraphAnimation
+    from src.data_structures.graph import Graph
 
 
 class Blossom(Vertex):

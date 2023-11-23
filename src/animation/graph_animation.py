@@ -15,8 +15,8 @@ from src.animation.constants import (
     HIGHLIGHT_WIDTH,
     HIGHLIGHT_COLOR,
 )
+from src.data_structures.blossom import Blossom
 if TYPE_CHECKING:
-    from src.data_structures.blossom import Blossom
     from src.data_structures.edge import Edge
     from src.data_structures.vertex import Vertex
     from src.data_structures.union_find import UnionFind
