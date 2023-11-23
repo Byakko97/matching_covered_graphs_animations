@@ -93,8 +93,7 @@ class EdmondsBlossom(AlgorithmBase):
                     else:
                         self.step = "end"
                     if len(self.barrier) > 0:
-                        self.g.update_animation_state()
-                        return True
+                        return super().update_state(widget, event)
         elif self.step == "shrink":
             self.g.color_alternating(
                 self.path_to_root(self.blossom.tip()),
@@ -108,8 +107,7 @@ class EdmondsBlossom(AlgorithmBase):
                 self.step = "expand"
             else:
                 self.step = "begin"
-            self.g.update_animation_state()
-            return True
+            return super().update_state(widget, event)
 
         if self.step == "expand" or self.step == "last expand":
             if len(self.expansion_list) > 0:
@@ -121,8 +119,7 @@ class EdmondsBlossom(AlgorithmBase):
                 else:
                     self.step = "end"
 
-        self.g.update_animation_state()
-        return True
+        return super().update_state(widget, event)
 
     def build_queue(self) -> None:
         self.q: Deque[Vertex] = deque()

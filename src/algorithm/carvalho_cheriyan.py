@@ -114,8 +114,7 @@ class CarvalhoCheriyan(AlgorithmBase):
             self.g.color_edges(self.not_matchable_edges, NOT_MATCHABLE_COLOR)
             self.step = "end"
 
-        self.g.update_animation_state()
-        return True
+        return super().update_state(widget, event)
 
     def is_connected(self) -> bool:
         self.visit(self.g[0])

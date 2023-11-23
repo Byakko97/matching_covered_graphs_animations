@@ -7,7 +7,8 @@ class AlgorithmBase():
         self.g = g
 
     def update_state(self, widget, event) -> bool:
-        return False
+        self.g.update_animation_state()
+        return True
 
     def run_algorithm(self) -> None:
         while self.update_state(None, None):
