@@ -3,11 +3,12 @@ from typing import List
 from src.data_structures.vertex import Vertex
 from src.data_structures.edge import Edge
 from src.animation.graph_animation import GraphAnimation
+from src.animation.vertex_style import VertexStyle
+from src.animation.edge_style import EdgeStyle
 
 
 class Graph:
     """Um grafo"""
-
     def __init__(self, n: int = 0, read: bool = False, animate: bool = False):
         self.size = n
         m = 0
@@ -55,13 +56,15 @@ class Graph:
                 if e.matched and e.to.id > v.id:
                     print(v.id, e.to.id)
 
-    def color_vertices(self, vertices: List[Vertex], color: str) -> None:
+    def set_vertices_style(
+        self, vertices: List[Vertex], style: VertexStyle,
+    ) -> None:
         if self.animation is not None:
-            self.animation.color_vertices(vertices, color)
+            self.animation.set_vertices_style(vertices, style)
 
-    def color_edges(self, edges: List[Edge], color: str) -> None:
+    def set_edges_style(self, edges: List[Edge], style: EdgeStyle) -> None:
         if self.animation is not None:
-            self.animation.color_edges(edges, color)
+            self.animation.set_edges_style(edges, style)
 
     def color_alternating(self, path: List[Edge], undo: bool = False) -> None:
         if self.animation is not None:
