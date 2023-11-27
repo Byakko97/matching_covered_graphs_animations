@@ -6,15 +6,8 @@ import copy
 import graph_tool.all as gt
 from gi.repository import Gtk, GLib
 
-from src.animation.constants import (
-    VERTEX_COLOR,
-    BLOSSOM_COLOR,
-    UNMATCHED_COLOR,
-    EDGE_WIDTH,
-    MATCHED_COLOR,
-    HIGHLIGHT_WIDTH,
-    HIGHLIGHT_COLOR,
-)
+from src.animation.edge_style import EdgeStyle, MatchingStyle, AlternatingStyle
+from src.animation.vertex_style import VertexStyle, BlossomStyle
 from src.data_structures.blossom import Blossom
 if TYPE_CHECKING:
     from src.data_structures.edge import Edge
@@ -24,7 +17,6 @@ if TYPE_CHECKING:
 
 class GraphAnimation:
     """Animação de um grafo"""
-
     def __init__(self, n: int = 0):
         self.g = gt.Graph(directed=False)
         if n > 0:
@@ -36,39 +28,49 @@ class GraphAnimation:
         self.edge_color = self.g.new_edge_property("string")
         self.edge_width = self.g.new_edge_property("float")
         self.draw_order = self.g.new_edge_property("int")
+        self.dash_style = self.g.new_edge_property("vector<double>")
 
         self.vertex_text = self.g.new_vertex_property("string")
         self.vertex_text_color = self.g.new_vertex_property("string")
         self.vertex_color = self.g.new_vertex_property("string")
+        self.vertex_border_color = self.g.new_vertex_property("string")
+        self.vertex_shape = self.g.new_vertex_property("string")
         for v in self.g.vertices():
-            self.vertex_color[v] = VERTEX_COLOR
-            self.vertex_text[v] = ""
-            self.vertex_text_color[v] = "white"
+            self.set_vertex_style(v, VertexStyle())
 
     def add_edge(self, u: int, v: int) -> None:
         e = self.g.add_edge(self.g.vertex(u), self.g.vertex(v))
-        self.edge_color[e] = UNMATCHED_COLOR
-        self.edge_width[e] = EDGE_WIDTH
-        self.draw_order[e] = 0
+        self.set_edge_style(e, EdgeStyle())
+
+    def set_edge_style(self, e: Edge, style: EdgeStyle) -> None:
+        self.edge_color[e] = style.color
+        self.edge_width[e] = style.width
+        self.draw_order[e] = style.draw_order
+        self.dash_style[e] = style.dash_style
+
+    def set_edges_style(self, edges: List[Edge], style: EdgeStyle) -> None:
+        for e in edges:
+            anim_edge = self.g.edge(e.to.id, e.twin.to.id)
+            self.set_edge_style(anim_edge, style)
 
     def match_color(self, e: Edge) -> None:
         anim_edge = self.g.edge(e.to.id, e.twin.to.id)
-        self.edge_color[anim_edge] = (
-            MATCHED_COLOR if e.matched else UNMATCHED_COLOR
+        self.set_edge_style(
+            anim_edge, MatchingStyle() if e.matched else EdgeStyle()
         )
-        self.edge_width[anim_edge] = (
-            HIGHLIGHT_WIDTH if e.matched else EDGE_WIDTH
-        )
-        self.draw_order[anim_edge] = 1 if e.matched else 0
 
-    def color_edges(self, edges: List[Edge], color: str) -> None:
-        for e in edges:
-            anim_edge = self.g.edge(e.to.id, e.twin.to.id)
-            self.edge_color[anim_edge] = color
+    def set_vertex_style(self, vertex: gt.Vertex, style: VertexStyle) -> None:
+        self.vertex_color[vertex] = style.color
+        self.vertex_border_color[vertex] = style.border_color
+        self.vertex_text[vertex] = style.text
+        self.vertex_text_color[vertex] = style.text_color
+        self.vertex_shape[vertex] = style.shape
 
-    def color_vertices(self, vertices: List[Vertex], color: str) -> None:
+    def set_vertices_style(
+        self, vertices: List[Vertex], style: VertexStyle,
+    ) -> None:
         for v in vertices:
-            self.vertex_color[self.g.vertex(v.id)] = color
+            self.set_vertex_style(self.g.vertex(v.id), style)
 
     def show_labels(self, vertices: List[Vertex]) -> None:
         for v in vertices:
@@ -76,19 +78,12 @@ class GraphAnimation:
             self.vertex_text[id] = str(v.color) if v.color != -1 else ""
 
     def color_alternating(self, path: List[Edge], undo: bool = False) -> None:
-        for e in path:
-            if not e.matched:
-                anim_edge = self.g.edge(e.to.id, e.twin.to.id)
-                self.edge_color[anim_edge] = (
-                    HIGHLIGHT_COLOR if not undo else UNMATCHED_COLOR
-                )
-                self.edge_width[anim_edge] = (
-                    HIGHLIGHT_WIDTH if not undo else EDGE_WIDTH
-                )
-                self.draw_order[anim_edge] = 1 if not undo else 0
+        style = AlternatingStyle() if not undo else EdgeStyle()
+        alternating_edges = filter(lambda e: not e.matched, path)
+        self.set_edges_style(alternating_edges, style)
 
     def shrink(self, blossom: Blossom, edges: List[Edge]) -> None:
-        self.color_vertices(blossom, BLOSSOM_COLOR)
+        self.set_vertices_style(blossom, BlossomStyle())
         self.color_alternating(edges, undo=True)
 
         old_pos = [copy.copy(self.pos[self.g.vertex(v.id)]) for v in blossom]
@@ -105,11 +100,13 @@ class GraphAnimation:
 
     def expand(self, blossom: Blossom, old_pos, dsu: UnionFind) -> None:
         for i in range(len(blossom)):
-            self.pos[self.g.vertex(blossom[i].id)] = old_pos[i]
-            self.vertex_color[self.g.vertex(blossom[i].id)] = (
-                BLOSSOM_COLOR if isinstance(dsu.find(blossom[i]), Blossom)
-                else VERTEX_COLOR
+            vertex = self.g.vertex(blossom[i].id)
+            self.pos[vertex] = old_pos[i]
+            style = (
+                BlossomStyle() if isinstance(dsu.find(blossom[i]), Blossom)
+                else VertexStyle()
             )
+            self.set_vertex_style(vertex, style)
 
     def animate(self, callback, manual_mode: bool, frequence: int) -> None:
         self.pos = gt.sfdp_layout(self.g)
@@ -117,10 +114,13 @@ class GraphAnimation:
                     self.g, self.pos, geometry=(750, 600),
                     eorder=self.draw_order,
                     vertex_fill_color=self.vertex_color,
+                    vertex_color=self.vertex_border_color,
                     vertex_text=self.vertex_text,
                     vertex_text_color=self.vertex_text_color,
+                    vertex_shape=self.vertex_shape,
                     edge_color=self.edge_color,
                     edge_pen_width=self.edge_width,
+                    edge_dash_style=self.dash_style,
                     vertex_size=20,
         )
 
