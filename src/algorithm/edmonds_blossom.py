@@ -3,7 +3,7 @@ from collections import deque
 from typing import Optional, List, Tuple, Deque
 
 from src.algorithm.algorithm_base import AlgorithmBase
-from src.animation.constants import BARRIER_COLOR
+from src.animation.vertex_style import BarrierStyle
 from src.data_structures.blossom import Blossom
 from src.data_structures.edge import Edge
 from src.data_structures.graph import Graph
@@ -12,7 +12,6 @@ from src.data_structures.union_find import UnionFind
 
 
 class EdmondsBlossom(AlgorithmBase):
-
     def __init__(self, g: Graph):
         super().__init__(g)
         self.expansion_list: List[Tuple[Blossom, Vertex]] = []
@@ -53,7 +52,7 @@ class EdmondsBlossom(AlgorithmBase):
         if deficiency != odd - len(self.barrier):
             return False
 
-        self.g.color_vertices(self.barrier, BARRIER_COLOR)
+        self.g.set_vertices_style(self.barrier, BarrierStyle())
 
         return True
 
@@ -154,7 +153,7 @@ class EdmondsBlossom(AlgorithmBase):
                         self.augmenting = (u, v, e)
                         return "augment"
                     else:
-                        # contrai a floração
+                        # contrai a corola
                         cycle, edge_cycle = self.find_cycle(u, v, e.twin)
                         self.blossom = Blossom(
                             self.dsu, cycle, edge_cycle, self.g.animation
@@ -188,7 +187,7 @@ class EdmondsBlossom(AlgorithmBase):
         return edges
 
     def fill_expansion(self) -> None:
-        # adiciona todas as florações na lista de expansão
+        # adiciona todas as corolas na lista de expansão
         for v in self.g.vertices:
             x = self.dsu.find(v)
             if isinstance(x, Blossom):
@@ -210,7 +209,7 @@ class EdmondsBlossom(AlgorithmBase):
         self.g.switch(e)
         if e.matched:
             # se a aresta entrou no emparelhamento, devemos ajeitar os
-            # extremos dela se eles forem florações
+            # extremos dela se eles forem corolas
             f = e
             for _ in range(2):
                 v = self.dsu.find(f.to)
