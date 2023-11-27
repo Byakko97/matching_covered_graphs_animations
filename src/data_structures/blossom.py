@@ -1,17 +1,16 @@
 from __future__ import annotations
 from typing import Callable, Optional, TYPE_CHECKING
-from src.animation.constants import FLOWER_COLOR
 from src.data_structures.edge import Edge
 from src.data_structures.vertex import Vertex
 from src.data_structures.union_find import UnionFind
+from src.animation.vertex_style import FlowerStyle
 if TYPE_CHECKING:
     from src.animation.graph_animation import GraphAnimation
     from src.data_structures.graph import Graph
 
 
 class Blossom(Vertex):
-    """Uma floração comprimida"""
-
+    """Uma corola comprimida"""
     def __init__(
         self,
         dsu: UnionFind,
@@ -34,7 +33,7 @@ class Blossom(Vertex):
                 if u not in cycle:
                     self.add_neighbor(e)
 
-        # contrai a floração
+        # contrai a corola
         dsu.add(self)
         for w in cycle:
             dsu.union(self, w)
@@ -42,7 +41,7 @@ class Blossom(Vertex):
 
         if animation is not None:
             self.old_pos = None
-            animation.color_vertices(self.get_vertices(), FLOWER_COLOR)
+            animation.set_vertices_style(self.get_vertices(), FlowerStyle())
             animation.color_alternating(self.edge_cycle)
 
     def shrink_animation(self, animation) -> None:
@@ -71,7 +70,7 @@ class Blossom(Vertex):
         expose: Optional[Vertex],
         push: Callable[['Blossom', Optional[Vertex]], None],
     ) -> None:
-        # expande a floração deixando o vértice `expose` não emparelhado
+        # expande a corola deixando o vértice `expose` não emparelhado
 
         for v in self.cycle:
             dsu.detach(v)
