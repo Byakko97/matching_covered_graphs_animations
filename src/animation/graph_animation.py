@@ -29,9 +29,8 @@ class GraphAnimation:
         self.edge_width = self.g.new_edge_property("float")
         self.draw_order = self.g.new_edge_property("int")
         self.dash_style = self.g.new_edge_property("vector<double>")
+        self.edge_marker = self.g.new_edge_property("string")
 
-        self.vertex_text = self.g.new_vertex_property("string")
-        self.vertex_text_color = self.g.new_vertex_property("string")
         self.vertex_color = self.g.new_vertex_property("string")
         self.vertex_border_color = self.g.new_vertex_property("string")
         self.vertex_shape = self.g.new_vertex_property("string")
@@ -47,13 +46,14 @@ class GraphAnimation:
         self.edge_width[e] = style.width
         self.draw_order[e] = style.draw_order
         self.dash_style[e] = style.dash_style
+        self.edge_marker[e] = style.marker
 
     def set_edges_style(self, edges: List[Edge], style: EdgeStyle) -> None:
         for e in edges:
             anim_edge = self.g.edge(e.to.id, e.twin.to.id)
             self.set_edge_style(anim_edge, style)
 
-    def match_color(self, e: Edge) -> None:
+    def match_style(self, e: Edge) -> None:
         anim_edge = self.g.edge(e.to.id, e.twin.to.id)
         self.set_edge_style(
             anim_edge, MatchingStyle() if e.matched else EdgeStyle()
@@ -62,8 +62,6 @@ class GraphAnimation:
     def set_vertex_style(self, vertex: gt.Vertex, style: VertexStyle) -> None:
         self.vertex_color[vertex] = style.color
         self.vertex_border_color[vertex] = style.border_color
-        self.vertex_text[vertex] = style.text
-        self.vertex_text_color[vertex] = style.text_color
         self.vertex_shape[vertex] = style.shape
 
     def set_vertices_style(
@@ -71,11 +69,6 @@ class GraphAnimation:
     ) -> None:
         for v in vertices:
             self.set_vertex_style(self.g.vertex(v.id), style)
-
-    def show_labels(self, vertices: List[Vertex]) -> None:
-        for v in vertices:
-            id = self.g.vertex(v.id)
-            self.vertex_text[id] = str(v.color) if v.color != -1 else ""
 
     def color_alternating(self, path: List[Edge], undo: bool = False) -> None:
         style = AlternatingStyle() if not undo else EdgeStyle()
@@ -115,12 +108,11 @@ class GraphAnimation:
                     eorder=self.draw_order,
                     vertex_fill_color=self.vertex_color,
                     vertex_color=self.vertex_border_color,
-                    vertex_text=self.vertex_text,
-                    vertex_text_color=self.vertex_text_color,
                     vertex_shape=self.vertex_shape,
                     edge_color=self.edge_color,
                     edge_pen_width=self.edge_width,
                     edge_dash_style=self.dash_style,
+                    edge_mid_marker=self.edge_marker,
                     vertex_size=20,
         )
 

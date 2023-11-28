@@ -23,4 +23,22 @@ class BarrierStyle(VertexStyle):
     def __init__(self):
         super().__init__()
         self.shape = "square"
-        self.color = "cyan"
+        self.color = "blue"
+
+
+class DeletedVertex(VertexStyle):
+    def __init__(self):
+        super().__init__()
+        self.border_color = "gray"
+
+
+class OddComponentStyle(VertexStyle):
+    def __init__(self):
+        super().__init__()
+        self.shape = "double_circle"
+
+
+class EvenComponentStyle(VertexStyle):
+    def __init__(self):
+        super().__init__()
+        self.color = "black"

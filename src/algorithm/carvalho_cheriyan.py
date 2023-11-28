@@ -2,14 +2,17 @@ from typing import Optional, List
 
 from src.algorithm.algorithm_base import AlgorithmBase
 from src.algorithm.edmonds_blossom import EdmondsBlossom
+from src.animation.edge_style import DeletedEdge, EdgeStyle, NotMatchableStyle
+from src.animation.vertex_style import (
+    VertexStyle,
+    DeletedVertex,
+    BarrierStyle,
+    OddComponentStyle,
+    EvenComponentStyle,
+)
 from src.data_structures.graph import Graph
 from src.data_structures.vertex import Vertex
 from src.data_structures.edge import Edge
-from src.animation.constants import (
-    VERTEX_COLOR,
-    DELETED_COLOR,
-    NOT_MATCHABLE_COLOR,
-)
 
 
 class CarvalhoCheriyan(AlgorithmBase):
@@ -80,19 +83,11 @@ class CarvalhoCheriyan(AlgorithmBase):
             else:
                 edmonds = EdmondsBlossom(self.g)
                 edmonds.run_algorithm()
-                self.g.color_vertices(edmonds.barrier, VERTEX_COLOR)
                 if not self.is_matchable(self.g, self.g.size):
-                    unmatched_vertices = [
-                        v for v in self.g.vertices if not v.matched()
-                    ]
-                    self.g.color_vertices(
-                        unmatched_vertices,
-                        NOT_MATCHABLE_COLOR,
-                    )
-
                     self.not_matchable_edges = self.g.edges
                     self.step = "end"
                 else:
+                    self.g.set_vertices_style(edmonds.barrier, VertexStyle())
                     self.step = "delete_vertex"
         elif self.step == "delete_vertex":
             self.delete_vertex(self.g[self.iteration_pos])
@@ -103,7 +98,7 @@ class CarvalhoCheriyan(AlgorithmBase):
         elif self.step == "undelete_vertex":
             for v in self.g.vertices:
                 v.reset()
-            self.g.show_labels()
+            self.g.set_vertices_style(self.g.vertices, VertexStyle())
             self.undelete_vertex(self.g[self.iteration_pos])
             self.iteration_pos += 1
             if self.iteration_pos == self.g.size:
@@ -111,7 +106,10 @@ class CarvalhoCheriyan(AlgorithmBase):
             else:
                 self.step = "delete_vertex"
         elif self.step == "final":
-            self.g.color_edges(self.not_matchable_edges, NOT_MATCHABLE_COLOR)
+            self.g.set_edges_style(self.g.edges, EdgeStyle())
+            self.g.set_edges_style(
+                self.not_matchable_edges, NotMatchableStyle(),
+            )
             self.step = "end"
 
         return super().update_state(widget, event)
@@ -145,7 +143,7 @@ class CarvalhoCheriyan(AlgorithmBase):
         )
 
     def delete_vertex(self, v: Vertex) -> None:
-        self.g.color_vertices([v], DELETED_COLOR)
+        self.g.set_vertices_style([v], DeletedVertex())
         deleted_edges = []
 
         self.current_aux_graph = Graph(self.g.size)
@@ -159,26 +157,36 @@ class CarvalhoCheriyan(AlgorithmBase):
             if edge.matched:
                 self.current_aux_graph.switch(aux_edge)
 
-        self.g.color_edges(deleted_edges, DELETED_COLOR)
+        self.g.set_edges_style(deleted_edges, DeletedEdge())
 
     def iterate(self, v: Vertex) -> None:
         EdmondsBlossom(self.current_aux_graph).run_algorithm()
         new_not_matchables: List[Edge] = []
         for e in v.adjacency:
             u = e.to
-            if u.id < v.id:
-                continue
             if self.current_aux_graph[u.id].color != 0:
                 new_not_matchables.append(e)
-                self.not_matchable_edges.append(e)
+                if u.id > v.id:
+                    self.not_matchable_edges.append(e)
 
-        for u in self.g.vertices:
-            if u != v:
-                u.color = self.current_aux_graph[u.id].color
-        self.g.show_labels()
-        self.g.color_edges(new_not_matchables, NOT_MATCHABLE_COLOR)
+        barrier = filter(
+            lambda u: self.current_aux_graph[u.id].color == 1, self.g.vertices
+        )
+        self.g.set_vertices_style(barrier, BarrierStyle())
+        odd_components = filter(
+            lambda u: u != v and self.current_aux_graph[u.id].color == 0,
+            self.g.vertices,
+        )
+        self.g.set_vertices_style(odd_components, OddComponentStyle())
+        even_components = filter(
+            lambda u: u != v and self.current_aux_graph[u.id].color == -1,
+            self.g.vertices,
+        )
+        self.g.set_vertices_style(even_components, EvenComponentStyle())
+
+        self.g.set_edges_style(new_not_matchables, NotMatchableStyle())
 
     def undelete_vertex(self, v: Vertex) -> None:
-        self.g.color_vertices([v], VERTEX_COLOR)
+        self.g.set_vertices_style([v], VertexStyle())
         for e in v.adjacency:
-            self.g.match_color(e)
+            self.g.match_style(e)

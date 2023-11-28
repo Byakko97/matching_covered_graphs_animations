@@ -44,11 +44,11 @@ class Graph:
 
     def switch(self, e: Edge) -> None:
         e.switch()
-        self.match_color(e)
+        self.match_style(e)
 
-    def match_color(self, e: Edge) -> None:
+    def match_style(self, e: Edge) -> None:
         if self.animation is not None:
-            self.animation.match_color(e)
+            self.animation.match_style(e)
 
     def print_matching(self) -> None:
         for v in self.vertices:
@@ -73,7 +73,3 @@ class Graph:
     def update_animation_state(self) -> None:
         if self.animation is not None:
             self.animation.update_state()
-
-    def show_labels(self) -> None:
-        if self.animation is not None:
-            self.animation.show_labels(self.vertices)
