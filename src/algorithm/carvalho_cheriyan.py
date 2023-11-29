@@ -30,7 +30,7 @@ class CarvalhoCheriyan(AlgorithmBase):
             print("The graph is matching covered.")
         else:
             print("The graph is not matching covered since ", end="")
-            if self.g.size == 0:
+            if len(self.g.edges) == 0:
                 print("doesn't have at least one edge")
             elif not self.connected:
                 print("is not connected.")
@@ -78,7 +78,7 @@ class CarvalhoCheriyan(AlgorithmBase):
             return False
 
         if self.step == "begin":
-            if self.g.size == 0 or not self.is_connected():
+            if len(self.g.edges) == 0 or not self.is_connected():
                 self.step = "end"
             else:
                 edmonds = EdmondsBlossom(self.g)
@@ -137,7 +137,8 @@ class CarvalhoCheriyan(AlgorithmBase):
 
     def is_matching_covered(self) -> bool:
         return (
-            self.connected
+            len(self.g.edges) > 0
+            and self.connected
             and self.is_matchable(self.g, self.g.size)
             and len(self.not_matchable_edges) == 0
         )
