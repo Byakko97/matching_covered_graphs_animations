@@ -18,6 +18,7 @@ class Graph:
         self.vertices = [Vertex(i) for i in range(self.size)]
 
         self.animation = None if not animate else GraphAnimation(self.size)
+        self.hide_animation = False
 
         self.edges: List[Edge] = []
         for _ in range(m):
@@ -71,5 +72,5 @@ class Graph:
             self.animation.color_alternating(path, undo)
 
     def update_animation_state(self) -> None:
-        if self.animation is not None:
+        if self.animation is not None and not self.hide_animation:
             self.animation.update_state()

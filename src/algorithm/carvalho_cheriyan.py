@@ -75,14 +75,17 @@ class CarvalhoCheriyan(AlgorithmBase):
 
     def update_state(self, widget, event) -> bool:
         if self.step == "end":
+            super().update_state(widget, event)
             return False
 
         if self.step == "begin":
             if len(self.g.edges) == 0 or not self.is_connected():
                 self.step = "end"
             else:
+                self.g.hide_animation = True
                 edmonds = EdmondsBlossom(self.g)
                 edmonds.run_algorithm()
+                self.g.hide_animation = False
                 if not self.is_matchable(self.g, self.g.size):
                     self.not_matchable_edges = self.g.edges
                     self.step = "end"

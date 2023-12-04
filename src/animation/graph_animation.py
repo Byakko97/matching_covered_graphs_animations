@@ -22,6 +22,8 @@ class GraphAnimation:
         if n > 0:
             self.g.add_vertex(n)
 
+        self.frame_count = 0
+        self.offscreen = None
         self.pos = None
         self.win = None
 
@@ -101,25 +103,50 @@ class GraphAnimation:
             )
             self.set_vertex_style(vertex, style)
 
-    def animate(self, callback, manual_mode: bool, frequence: int) -> None:
+    def animate(
+        self, callback, manual_mode: bool, frequence: int, offscreen: bool,
+    ) -> None:
+        self.offscreen = offscreen
+
         self.pos = gt.sfdp_layout(self.g)
-        self.win = gt.GraphWindow(
-                    self.g, self.pos, geometry=(750, 600),
-                    eorder=self.draw_order,
-                    vertex_fill_color=self.vertex_color,
-                    vertex_color=self.vertex_border_color,
-                    vertex_shape=self.vertex_shape,
-                    edge_color=self.edge_color,
-                    edge_pen_width=self.edge_width,
-                    edge_dash_style=self.dash_style,
-                    edge_mid_marker=self.edge_marker,
-                    vertex_size=20,
-        )
+        if not offscreen:
+            self.win = gt.GraphWindow(
+                        self.g, self.pos, geometry=(750, 600),
+                        eorder=self.draw_order,
+                        vertex_fill_color=self.vertex_color,
+                        vertex_color=self.vertex_border_color,
+                        vertex_shape=self.vertex_shape,
+                        edge_color=self.edge_color,
+                        edge_pen_width=self.edge_width,
+                        edge_dash_style=self.dash_style,
+                        edge_mid_marker=self.edge_marker,
+                        vertex_size=20,
+            )
+        else:
+            self.win = Gtk.OffscreenWindow()
+            self.win.set_default_size(750, 600)
+            self.win.graph = gt.GraphWidget(
+                        self.g, self.pos,
+                        eorder=self.draw_order,
+                        vertex_fill_color=self.vertex_color,
+                        vertex_color=self.vertex_border_color,
+                        vertex_shape=self.vertex_shape,
+                        edge_color=self.edge_color,
+                        edge_pen_width=self.edge_width,
+                        edge_dash_style=self.dash_style,
+                        edge_mid_marker=self.edge_marker,
+                        vertex_size=20,
+            )
+            self.win.add(self.win.graph)
 
         self.win.connect("delete_event", Gtk.main_quit)
-        self.win.graph.disconnect_by_func(self.win.graph.button_press_event)
+        self.win.graph.disconnect_by_func(
+            self.win.graph.button_press_event,
+        )
         if manual_mode:
             self.win.connect("button_press_event", callback)
+        elif offscreen:
+            GLib.idle_add(callback, None, None)
         else:
             GLib.timeout_add(frequence, callback, None, None)
 
@@ -129,3 +156,10 @@ class GraphAnimation:
     def update_state(self) -> None:
         self.win.graph.regenerate_surface()
         self.win.graph.queue_draw()
+
+        if self.offscreen:
+            pixbuf = self.win.get_pixbuf()
+            pixbuf.savev(
+                r'./frames/anim%06d.png' % self.frame_count, 'png', [], [],
+            )
+            self.frame_count += 1

@@ -5,4 +5,4 @@ test:
 	python3 src/api/test.py $(algo)
 
 animate:
-	python3 src/api/animate.py $(algo) $(test) $(if $(f), -f $(f), ) $(if $(filter true,$(m)), -m, )
+	python3 src/api/animate.py $(algo) $(test) $(if $(f), -f $(f), ) $(if $(filter true,$(m)), -m, ) $(if $(filter true,$(off)), --offscreen, )

@@ -14,8 +14,12 @@ class AlgorithmBase():
         while self.update_state(None, None):
             pass
 
-    def animate(self, manual_mode: bool, frequence: int) -> None:
-        self.g.animation.animate(self.update_state, manual_mode, frequence)
+    def animate(
+        self, manual_mode: bool, frequence: int, offscreen: bool,
+    ) -> None:
+        self.g.animation.animate(
+            self.update_state, manual_mode, frequence, offscreen,
+        )
 
     def run(self) -> None:
         self.run_algorithm()

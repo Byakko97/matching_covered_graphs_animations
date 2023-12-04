@@ -69,6 +69,7 @@ class EdmondsBlossom(AlgorithmBase):
 
     def update_state(self, widget, event) -> bool:
         if self.step == "end":
+            super().update_state(widget, event)
             return False
 
         if self.step == "begin":

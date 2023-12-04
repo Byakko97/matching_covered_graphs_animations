@@ -12,6 +12,11 @@ parser.add_argument(
 )
 parser.add_argument("test_name", help="Test name")
 parser.add_argument(
+    "--offscreen", dest="offscreen", action="store_true",
+    help="Activates offscreen mode. The frames will be saved in the folder "
+    "frames."
+)
+parser.add_argument(
     "-m", "--manual", dest="manual", action="store_true",
     help="Activates manual mode. You have to do a click in the window in "
     "order to show the next frame of the animation."
@@ -27,4 +32,4 @@ sys.stdin = open("tests/" + args.test_name, "r")
 
 g = Graph(read=True, animate=True)
 algo = algorithm_map[args.algorithm](g)
-algo.animate(args.manual, args.frequence)
+algo.animate(args.manual, args.frequence, args.offscreen)
