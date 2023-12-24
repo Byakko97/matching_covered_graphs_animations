@@ -46,6 +46,13 @@ If you rather execute the animation manually, you can do it adding `m=true`. In 
 make animate algo=algo_name test=test_name m=true
 ```
 
+You can also execute the animation offscreen. In that case, the animation frames will be saved in the folder `frames`. To execute the animation in this mode, run
+
+```
+make animate algo=algo_name test=test_name off=true
+
+```
+
 ### Run algorithms
 
 If you just want to run the algorithm `algo_name` with the input test `test_name` without animation, execute the following command:
